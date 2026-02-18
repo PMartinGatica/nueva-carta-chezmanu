@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chez Manu — Carte</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Cinzel:wght@400;600&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        :root {
+            --red: #C00000;
+            --blue-mer: #548DD4;
+            --brown-terre: #984806;
+            --cream: #F9F5EE;
+            --cream-dark: #F0EAE0;
+            --ink: #1A1410;
+            --ink-light: #4A3F35;
+            --gold: #C9A84C;
+            --gold-light: #E8D5A3;
+            --divider: #D4C4A8;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            background: var(--cream);
+            color: var(--ink);
+            min-height: 100vh;
+        }
+
+        /* ─── LOGO ─────────────────────────────────────────────── */
+        .logo-container {
+            text-align: center;
+            margin-bottom: 1.2rem;
+        }
+
+        .logo-container img {
+            width: 130px;
+            height: auto;
+            opacity: .92;
+        }
+
+        .cover .logo-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .cover .logo-container img {
+            width: 180px;
+        }
+
+        /* ─── NAV BAR ──────────────────────────────────────────── */
+        .nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--ink);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2.5rem;
+            height: 56px;
+            border-bottom: 2px solid var(--gold);
+        }
+
+        .nav-brand {
+            font-family: 'Cinzel', serif;
+            color: var(--gold);
+            font-size: 1.1rem;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: .25rem;
+        }
+
+        .nav-tab {
+            font-family: 'Cinzel', serif;
+            font-size: .72rem;
+            letter-spacing: .12em;
+            color: var(--gold-light);
+            background: transparent;
+            border: 1px solid transparent;
+            padding: .45rem 1.1rem;
+            cursor: pointer;
+            transition: all .2s;
+            text-transform: uppercase;
+        }
+
+        .nav-tab:hover,
+        .nav-tab.active {
+            color: var(--ink);
+            background: var(--gold);
+            border-color: var(--gold);
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: .75rem;
+        }
+
+        .btn-pdf {
+            font-family: 'Cinzel', serif;
+            font-size: .65rem;
+            letter-spacing: .12em;
+            color: var(--ink);
+            background: var(--gold);
+            border: none;
+            padding: .45rem 1.2rem;
+            cursor: pointer;
+            transition: opacity .2s;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+        }
+
+        .btn-pdf:hover {
+            opacity: .8;
+        }
+
+        .btn-pdf svg {
+            width: 13px;
+            height: 13px;
+        }
+
+        /* ─── MAIN ─────────────────────────────────────────────── */
+        main {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 3rem 2rem 6rem;
+        }
+
+        .menu-section {
+            display: none;
+            animation: fadeIn .4s ease;
+        }
+
+        .menu-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ─── PAGE HEADER ──────────────────────────────────────── */
+        .page-header {
+            text-align: center;
+            padding-bottom: 2.5rem;
+            border-bottom: 1px solid var(--divider);
+            margin-bottom: 2.5rem;
+        }
+
+        .restaurant-name {
+            font-family: 'Cinzel', serif;
+            font-size: .8rem;
+            letter-spacing: .3em;
+            color: var(--gold);
+            text-transform: uppercase;
+            margin-bottom: .75rem;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--red);
+            line-height: 1.15;
+            margin-bottom: .4rem;
+        }
+
+        .section-title-italic {
+            font-style: italic;
+        }
+
+        .section-subtitle {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+            color: var(--ink-light);
+            letter-spacing: .08em;
+            font-style: italic;
+        }
+
+        /* ─── CATEGORY HEADER ──────────────────────────────────── */
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin: 2.8rem 0 1.8rem;
+        }
+
+        .category-header::before,
+        .category-header::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--divider);
+        }
+
+        .category-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            font-style: italic;
+            font-weight: 400;
+            white-space: nowrap;
+        }
+
+        .cat-mer {
+            color: var(--blue-mer);
+        }
+
+        .cat-terre {
+            color: var(--brown-terre);
+        }
+
+        .cat-single {
+            color: var(--ink);
+        }
+
+        /* ─── MENU ITEM ────────────────────────────────────────── */
+        .menu-item {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 0 2rem;
+            padding: 1.4rem 0;
+            border-bottom: 1px solid var(--cream-dark);
+            align-items: start;
+            transition: background .15s;
+        }
+
+        .menu-item:hover {
+            background: rgba(201, 168, 76, .04);
+            padding-left: .5rem;
+            padding-right: .5rem;
+            margin: 0 -.5rem;
+            border-radius: 2px;
+        }
+
+        .item-info {
+            min-width: 0;
+        }
+
+        .item-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--ink);
+            line-height: 1.35;
+            margin-bottom: .25rem;
+        }
+
+        .item-desc {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: .95rem;
+            color: var(--ink-light);
+            font-style: normal;
+            line-height: 1.5;
+            margin-bottom: .15rem;
+        }
+
+        .item-translation {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: .88rem;
+            color: #8A7A6A;
+            font-style: italic;
+            line-height: 1.45;
+        }
+
+        .item-price {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            font-weight: 400;
+            color: var(--ink);
+            white-space: nowrap;
+            padding-top: .15rem;
+            letter-spacing: .02em;
+        }
+
+        /* ─── FOOTER ───────────────────────────────────────────── */
+        .page-footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--divider);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: .85rem;
+            color: var(--ink-light);
+            font-style: italic;
+            letter-spacing: .04em;
+        }
+
+        /* ─── COVER ────────────────────────────────────────────── */
+        .cover {
+            text-align: center;
+            padding: 5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .cover-ornament {
+            width: 60px;
+            height: 1px;
+            background: var(--gold);
+            display: inline-block;
+        }
+
+        .cover-title {
+            font-family: 'Cinzel', serif;
+            font-size: 4rem;
+            color: var(--red);
+            letter-spacing: .12em;
+        }
+
+        .cover-tagline {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-style: italic;
+            color: var(--ink-light);
+        }
+
+        .cover-city {
+            font-family: 'Cinzel', serif;
+            font-size: .75rem;
+            letter-spacing: .3em;
+            color: var(--gold);
+            text-transform: uppercase;
+        }
+
+        .cover-nav {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .cover-btn {
+            font-family: 'Cinzel', serif;
+            font-size: .75rem;
+            letter-spacing: .15em;
+            color: var(--ink);
+            background: transparent;
+            border: 1px solid var(--gold);
+            padding: .9rem 2rem;
+            cursor: pointer;
+            transition: all .25s;
+            text-transform: uppercase;
+        }
+
+        .cover-btn:hover {
+            background: var(--gold);
+        }
+
+        /* ─── PRINT ────────────────────────────────────────────── */
+        @media print {
+
+            .nav,
+            .pdf-controls {
+                display: none !important;
+            }
+
+            body {
+                background: white;
+            }
+
+            main {
+                padding: 0;
+                max-width: 100%;
+            }
+
+            .menu-section {
+                display: block !important;
+            }
+
+            .menu-item:hover {
+                padding-left: 0;
+                padding-right: 0;
+                margin: 0;
+                background: none;
+            }
+        }
+
+        /* ─── TOAST ────────────────────────────────────────────── */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--ink);
+            color: var(--gold);
+            font-family: 'Cinzel', serif;
+            font-size: .75rem;
+            letter-spacing: .1em;
+            padding: .9rem 1.5rem;
+            border-left: 3px solid var(--gold);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all .3s;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ─── RESPONSIVE ───────────────────────────────────────── */
+        @media (max-width: 640px) {
+            .nav {
+                padding: 0 1rem;
+                flex-wrap: wrap;
+                height: auto;
+                padding: .75rem 1rem;
+                gap: .5rem;
+            }
+
+            .nav-tabs {
+                overflow-x: auto;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .item-name {
+                font-size: 1.05rem;
+            }
+
+            main {
+                padding: 2rem 1.2rem 5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="nav">
+        <span class="nav-brand">Chez Manu</span>
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showSection('cover', this)">Carte</button>
+            <button class="nav-tab" onclick="showSection('entrees', this)">Entrées</button>
+            <button class="nav-tab" onclick="showSection('principales', this)">Principales</button>
+            <button class="nav-tab" onclick="showSection('desserts', this)">Desserts</button>
+        </div>
+        <div class="nav-actions">
+            <button class="btn-pdf" onclick="downloadPDF()" title="Descargar sección como PDF">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path
+                        d="M12 15V3m0 12-4-4m4 4 4-4M2 17l.621 2.485A2 2 0 0 0 4.561 21h14.878a2 2 0 0 0 1.94-1.515L22 17" />
+                </svg>
+                PDF
+            </button>
+        </div>
+    </nav>
+
+    <main>
+
+        <!-- COVER -->
+        <section id="cover" class="menu-section active">
+            <div class="cover">
+                <div class="logo-container">
+                    <img src="data:image/jpeg;base64,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"
+                        alt="Chez Manu" class="logo-img">
+                </div>
+                <span class="cover-ornament"></span>
+                <div class="cover-city">Ushuaia · Tierra del Fuego · Patagonia</div>
+                <h1 class="cover-title">Chez Manu</h1>
+                <div class="cover-tagline">Cuisine franco-patagónica desde los confines del mundo</div>
+                <span class="cover-ornament"></span>
+                <div class="cover-nav">
+                    <button class="cover-btn"
+                        onclick="showSection('entrees', document.querySelector('.nav-tab:nth-child(2)'))">Nos
+                        Entrées</button>
+                    <button class="cover-btn"
+                        onclick="showSection('principales', document.querySelector('.nav-tab:nth-child(3)'))">Assiettes
+                        Principales</button>
+                    <button class="cover-btn"
+                        onclick="showSection('desserts', document.querySelector('.nav-tab:nth-child(4)'))">Nos
+                        Desserts</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ENTRÉES -->
+        <section id="entrees" class="menu-section" data-title="Nos Entrées">
+            <div class="page-header">
+                <div class="logo-container">
+                    <img src="data:image/jpeg;base64,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"
+                        alt="Chez Manu" class="logo-img">
+                </div>
+                <div class="restaurant-name">Chez Manu</div>
+                <h2 class="section-title section-title-italic">Nos Entrées</h2>
+                <p class="section-subtitle">Entradas · Starters</p>
+            </div>
+            <div id="entrees-items"></div>
+            <div class="page-footer">Los precios incluyen IVA · Prix TTC · Prices include VAT</div>
+        </section>
+
+        <!-- PRINCIPALES -->
+        <section id="principales" class="menu-section" data-title="Nos Assiettes Principales">
+            <div class="page-header">
+                <div class="logo-container">
+                    <img src="data:image/jpeg;base64,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"
+                        alt="Chez Manu" class="logo-img">
+                </div>
+                <div class="restaurant-name">Chez Manu</div>
+                <h2 class="section-title">Nos Assiettes Principales</h2>
+                <p class="section-subtitle">Platos principales · Main Courses</p>
+            </div>
+            <div class="category-header"><span class="category-name cat-mer">La Mer</span></div>
+            <div id="mer-items"></div>
+            <div class="category-header"><span class="category-name cat-terre">La Terre</span></div>
+            <div id="terre-items"></div>
+            <div class="page-footer">Los precios incluyen IVA · Prix TTC · Prices include VAT</div>
+        </section>
+
+        <!-- DESSERTS -->
+        <section id="desserts" class="menu-section" data-title="Nos Desserts">
+            <div class="page-header">
+                <div class="logo-container">
+                    <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCADgAOsDASIAAhEBAxEB/8QAHQABAAICAwEBAAAAAAAAAAAAAAYHBQgBAgMECf/EADwQAAEDBAAEBAQEAwYHAQAAAAEAAgMEBQYRBxIhMRNBUXEIFCJhFTKBoSNSkRYkM0KisRclJmJjcoPh/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAH/xAAVEQEBAAAAAAAAAAAAAAAAAAAAEf/aAAwDAQACEQMRAD8A3LREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBEXSeWOGJ0ssjY42jbnOOgB6koO6KFVPFXAIKp9MMlo55IzqQU+5Qz3LAQFl7PmOMXjwha79b6t0ri1jIp2lxIGyNd9oM8iwdFluNV1+fYaO+UFTc42F76aKZrntA77A7LOICIiAiIgIsTkt/t+PUHz1yM7YAdF0UD5OXpvZDQSB91i8H4hYfmr6hmMX2luL6bXjMjP1M36g9UEqRcOcGtJPQBQCl4x8Pqy+S2S33z5+4RPLJIaWB8paQdHfKD035oLARdWOD2hw31G+q7ICIiAiIgIiICIiAiIgIiICIiAVqf8XuYX+78S8d4R2atlo6S6PjFc6N3K6QPdrl36a2tsCtWvjA4fZHHmFj4rYlRzV1TaXsNVBENvDWO2HAdyO4KDYHBsKx3D8fgs1jtlPT08bA1xDBzSHzLj3JP3UYreEVjHFu2cQrWI7fU07JG1cEbNMqC4aDiB0Dh6rnhzxowXLbHDVC90turQwCoo6x4ikifrqNO1vr5hfZT54+8cQLfY8fppKu1mGWWsuQicYAQBysa/sTsoKUtE9jxH4y8oqnxR01ObU2Tw4Ii5znkDfK1o2Sfsrr4fcWsOza91VktFXUQ3SlBdJSVdO6GXlHmGu8lVuHy0kvxrZRKZoXH8KjYw7B66GwPuvmu1Rbm/HTaXUromvNnkZUOa4DbuQ6B+6C+bpltporyLM18tXceTxH01MwyPjZ/M7X5R791ha3iRaZsYr7rj0Ut4rKKZtPJb4mls7ZS4Dkc09QfPqqOxm62DFeOea2viVNUW2a6VTZ7fcXTSRRyxa6M52kDoPVXJhNv4Z47R3rMscfC2GVpdcK/xnyCTl67LnHr38kHlmXFygwyzC75Vjt5tlIXNZzvbG7bj2AAdslTHCsip8qxukvtHSVdLT1TOeNlVF4cnL5Eg9trXDG3Hj5xLOXZFUCkwSxz6tdDO8NFXKD+dwPl2/2Ww2I5XZ8ir7nRWR/jwWuVtPJOzXhF+tlrT566bQZm7zNprXVVDgCIoXPII76BK0dgguPAziNi3EmmdLLjmUQNdcWgfTG6Tq9vp02HD+i3H4m3GhocGvTqytipv7hNoveGn8h7KtocUt3E34WrZjTZ4JZ5LNCYHMcHGOZrByn7dRo+5QTHiZkckuOUNrxypDrnkRbDQvZ15I3Db5fZrdn30tefgitUVq4z8QqBpe/5Nxha+Q7cdSkbJ9TpT34Scdv9Dh0eQZ3ORU29klttraj6TT07HEO7+pGt+gChvwg1tI7jtxMnkqoW/MVLzEC4ASDxndW+v/6g2NyXPsfsVdLb3yVNdXwx+LNS0MDp5Y2fzODd6Huu+PZ9i9+xCTK7fc2PtUQd4srgWmMt/MHDuCPRVhc84sFJxLyiwUAtuM3BjG/MVk1OXVNweWdBG3zA6DfX2WD+Fu42mLgXf6aquFOK6apr5p4nuDXje+pb5ILEk46YEcbF/oaquuNH4jmE0lHJI5vL3cQB0H3KkFl4jY1esHGY2meettWiXOhhc57Nfm23uNKsfg/fRD4exGZIAWyVJlBI6bJ/MsT8KEb5uDuZUMBY97rjWNhjafIjQ0PQoLlsvEOwXvD48qs3ztxtsjywGnpnufsd/p1vovowDOsczmiqavHax1THTSmGbmjcwseO7SCO6pD4Us5xq0cIpsbr7pDTXugnqBLRPBEpOyRpvcrJ/BDPTz4Le52SN8eovM8r2b+oAnpsINg0REBERAREQEREBERAQgHuERBgazDcTrKwVdVjdqmqAd+I+lYXb99LNQwxQwthijbHG0aa1oAAHsvREGGixfHYq4V8Vkt8dWHc3jNp2h+/Xetrw/sXif4oLp/Z22/PB/iCo+Xb4nN671vakC4d2QY+7WWz3YMF0tlHWhh+kTwtfy+2wvV9tt77f+Huoqd1Hy8pg8McmvTl7aUVxW4ZVNkd1p7vDI2gaXijf4OubTjrr7a916YvXZJPa6yS5Me2rDHeA10WhsE6JAHt0QZJuFYg0abjVpDfQUrAP9lk7VarZaac09roKaihLuYsgjDGk+ugo66pyZ2HVNU5r4rrAHljGRhwlIH0gD0/oV6X+43222KmkoKWW41j3tdIPC/KzoXDQ89dAgzF3sNkvD2Putqo64sGmmeFr9D9QuLPYLJZ3SOtVro6Iv6P8CIM3/RYm9Vl+F3fDRMmbTzW/mgeIgQ2fn6h3p9JH7r5MkrsppcotUNvhfLbnMaa1zYubX1AHX6enuglVxt9DcaN1HX0kNTTu/NFIwOaf0KxVNheI0srJqbG7VDJGdseylY0tPrsBdJrrd25lT0Edve61PhcJJ+Q/TJ3H6a2PdY+3VmVvyX5eeEvtbqh5ZUCMNcxoH5HA9wfJwQSSaz2qa4suM1upJKyMcrJ3RNL2j0DtbXgMbx9rahostvAqTucCnb/ABf/AG6dV8NM69/2ulpZKiV1ubA2VrzCAC8uO2b+w0pIEGIosZx6igmgo7Jb6eGdvLKyOna1rx6EAdV7Wux2i1Fxtlso6MvGneBC1m/fSyKIMPDi+OwXKa5w2O3x1s4IlqG07Q9+++zra97HY7PZIXQ2i10lDG47c2CIM2fvpZFEBERAREQEREBERAREQEREBERAREQNBNBEQNBNIiDpLJHGwve5rWgbJJ0AF0gqKef/AAZo5NgO+lwPQ9itffjKuN4tdFYqujvLqCiEr2zR005jqpSR2YOzm63vfTotcOGnEC92PIfxy1/On8Ola19O+oe4Pg3rkeTsaPl06IP0XGk0F8NhrTcbPR1zoxG6ohbIWA75djel9yBpERAREQEREBERAREQEREBERAREQEREBERAREQFj7ve7TaGB90uVJRNPYzShm/ba9rvWw222VVwqHcsNPE6V5+zRsr87+KecXDPM+qLjJNWQwTy8kDWgubHGOzW76bI6koN74eI2EzXcWqLJLe+rJADBMD1PYb7KUtcHN2CCD5hfnfdrS6zU0BfcZTWP06ma+VkgO/IluiN/fa2S4L8XbVaMJdaM0uPy10tw/hxud4j5oT1Zykb5iO36IIN8U9PPcuNVHbriWupXW5go2vfytBJcHOA9+h/RVjxHxKtxQU8Fohpal1fygsZJ9QkY38w137/svTjxm+R59m1Pe4IKaioabdPQCVwa5jOYOLnHz39uy9bDS3SrvEd4ul2oqr5SA+FDTv8QNcQdb/AKn9lUbk8ELnBdeFmP1MNxNxc2jZHLO4acZGjTgR5EEaU1Wv3wWVVRNjGSUxY5lLDdP4IPYEsHN+/X9VsCooiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiII1xOpbnX4LdrdZ6UVNbV0zoI2F4aPqGiST5AFfn9n2F5BiGURYfPVRmqgHNJMD/C1LojTv5m9vZfpKRtV9kPCTE71JcKuupH1dbWyCV0tQ8v04flA9G710Hog/Pd9TU090dSXWp3UUVSWsJJ0/kJaQT5b9T6qQXPNKc1VFDS26GjrJwY55pADHo+h9FscfhRopqllXU5E41HiRveWRaB07mkJ69S7sPQKP8Axg8K8fslHbMoxqGmorlNM2iNC2P6aokH6gB2IVooisp4J3eLU1c9wqnyCJkcMrS0Ad9Dy/X0WRwe2ZJeskgtNhZGyurZfl2QN6hkYOy5xHps7P2XtnnDviFj9mrbvUQUlGyjhpqmqha/mlhZIXhrjrp0OwR9wty/h/4aY1heJ0NxoGCrulfSxyVNwk6vl5mg6Ho37BQSrhlh1uwbEaSw25o1GOaeT/NLKfzPPuVJ0RAREQEREBERAREQEREBERAREQEREBERAREQfNcqp1HRyVDaeaoLBsRxDbneyqnMuMF2sr2RwcPr+Q+Vsfjzw6jaCdFx5Seyt/S6vYx7S17Q5p7gjYKCFtzqrMbHMw+/y8zQeZsLdH225cvzmvbrlwjIXdN9ImdP9SmjWho0AAAuUEBrM+vEcLnQcPsjmeGktbyxjZ9N8y1+yyj4zZDxWteVV2E1s9qoakVFJaZKlp8FvTm2e2zoLb9caCDU7ifVcQc5uOUWWzYLXUtTcLfRw1TJqhgMDAZCD03zA7/ZSDhXd+PGJ0NosF2weO5WeihEBlZK0T8gHTqXaOvv5BWrizmv4zZgA8OLKKhBH8v+KVPdIIY3Lr8Q3/oa7jfrJF0/1Ls/K8hawuGDXN2j28aLZ/1KYogrzIs1ymistVWQYTWxyxRl7TLLGWkjyIB3/RfFhPETML5HF+IcM7rQcwBdIaiMs/TZB/ZWe5rXDTgD+iaCDiJxcwOc0tJGyD5LsiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgr7EYWx8ac1eHEuko6BxHp0kCsFQXHABxjyr/ALrfQn95VOkBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERARFw7euiCD2Ej/AIz5K0NIP4VREk9j9cynKpbEckv1d8Rd+sz7PFCYbbB81P4hLRGySTkIHq7nHT7FXQOyDlERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAQoodxhuOTWvA66rxOmM1za5jWlrOd0bC4B7w3/MQNnSDB5TkeN4dxGr60009Veq2ztmqIYixvLTwOd9e3EbO3dh16Ka4ZkNvyvGKDIbUZDRV8Ili8RvK7XoR6rVDLbJkuTur6iqv09/yGidGMbqaWjdDVNLj9bKgcoaI/sVtpitLNRY5bqWpihiqIqZjZmQtDWB/KObQHYb2gyaIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICFEPZB8zrhQta97quANY7lcTINNPofuvcOa9vM0ggjoQVUDrDeo48jxqTF5Z4rpdjVQ1wdH4Aic9rtu2eYEAEa0src6nP4qu4RW2jmMMdXAKTbWBhi5yHjXfQb13+yCyWsja4lrQCe5AXYFVHUVvFAUEeqOsfUPgmY7wmRAMlFQ3kPUj6TFzL2vN54lS0+UMpbHUwNNN/yWSMMMniN0DzgnX1Hbh9kFr7RQCxXfNn5hR01XZpxYjRNjlqJQ0SfMcoJeQD+XuPdT8ICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAq74yzV1nxysvdJfq2jnL4IYI2PAY0mRoJ1rqdEqxF51FPDUM5JomSN3vTmgj90FcSZNV41fG2j503eOpt81xbJUTDnZyAfQNDqCdrwl4riHHKO7vtYe+eUsdTsmJewcvMCRy+6sp1DSOe17qaEua3lBLBsD0XX8Poug+Ug0P8Axj2QQaTibQQZNU2qrphHTwwGYVQl212ow8Dtokg9gd9FlcSzegv2HSZHJBLRMg5xUQSDb4i3yI/of1UjNtoD3o4D/wDMemv9l7MpoGMcxkTGtd+YBoAPugq2m4pH8WrJpbfUupB9EUDC0mNsf+JK4/cua0N69ip3apat+JR1F0qA2okpzJJIz6eTm2Rr2BA/RZUUVKN/3eLrvf0Dz7r1MbSzkIBbrWtdNIKQwnIslpcUiyy51FRV0tNG1rt1geyoL5S0l45foLRorPRcVZnTUTPwyAsqqmohEgnPK0RPADj07EHasxlHTMhMLII2xnuwMHKf0XBoaMgA0sJA7bYOiCuKzioae5VtOLS6QU7ZiyMPd4r/AAwDza5dBp3sHfbqpTg2TS5EK7xKRkXykrYxLFJzxy7aHbadDtvRUg+UpvEMngR85Gi7lG9ei7QQxQN5Io2xt9GjQQeiIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIg//2Q=="
+                        alt="Chez Manu" class="logo-img">
+                </div>
+                <div class="restaurant-name">Chez Manu</div>
+                <h2 class="section-title section-title-italic">Nos Desserts</h2>
+                <p class="section-subtitle">Postres · Desserts</p>
+            </div>
+            <div class="category-header"><span class="category-name cat-single"
+                    style="color: var(--brown-terre)">Postres de saison</span></div>
+            <div id="desserts-items"></div>
+            <div class="page-footer">Los precios incluyen IVA · Prix TTC · Prices include VAT</div>
+        </section>
+
+    </main>
+
+    <div id="toast" class="toast">Generando PDF...</div>
+
+    <script>
+        const API_BASE = '/api';
+
+        const MENU_DATA = {
+            entrees: [
+                { id: 1, name: "Cojinova ahumada con pickles de salicornia", translation: "Smoked wreckfish with salicornia pickles", price: 32000, active: true },
+                { id: 2, name: "Centolla con Vieiras marinadas en agua de mar", translation: "King Crab with gently seawater-marinated scallops", price: 45000, active: true },
+                { id: 3, name: "Carpaccio de peceto de cordero, hojas verdes y queso de oveja", translation: "Lamb Carpaccio with green leaves and sheep's cheese", price: 28500, active: true },
+                { id: 4, name: "Terrina de cerdo \"de ma grand-mère\", jamón crudo y quesos", translation: "Grandmother's pork terrine with cured ham and cheeses", price: 39000, active: true },
+            ],
+            mer: [
+                { id: 5, name: "Merluza negra cocida en agua de mar", translation: "Patagonian toothfish gently cooked in seawater", price: 61500, active: true },
+                { id: 6, name: "Vieiras gratinadas del Atlántico Sur", translation: "South Atlantic Scallops au gratin", price: 40200, active: true },
+                { id: 7, name: "Risotto de hongos patagónicos", translation: "Patagonian wild mushroom risotto", price: 38000, active: true },
+            ],
+            terre: [
+                { id: 8, name: "Dúo de cordero \"Chez Manu\"", translation: "Lamb duo \"Chez Manu\" style", price: 42500, active: true },
+                { id: 9, name: "Ojo de bife con hongos patagónicos", translation: "Ribeye steak with Patagonian mushrooms", price: 46000, active: true },
+                { id: 10, name: "Solomillo de cerdo con mostaza Dijon", translation: "Pork tenderloin with Dijon mustard", price: 40000, active: true },
+            ],
+            desserts: [
+                { id: 11, name: "Crème brûlée \"tradition\"", description: "(crema aromatizada de vainilla)", price: 11500, active: true },
+                { id: 12, name: "Tarte Tatin de manzana y helado de vainilla", price: 14000, active: true },
+                { id: 13, name: "Pera épicée en infusión de calafate, helado de mascarpone", translation: "Spiced pear in calafate infusion", price: 13800, active: true },
+                { id: 14, name: "Fuego sobre el glaciar", description: "(helado recubierto en merengue, flambée)", translation: "\"Fire over the Glacier\" — Ice cream coated in meringue, flambéed", price: 10500, active: true },
+                { id: 15, name: "Tarta de chocolate caliente y helado", translation: "Hot chocolate cake and ice cream", price: 15600, active: true },
+                { id: 16, name: "Copa de Helado artesanal", price: 9000, active: true },
+            ]
+        };
+
+        function formatPrice(price) { return '$' + price.toLocaleString('es-AR'); }
+
+        function renderItem(item) {
+            if (!item.active) return '';
+            return `
+    <div class="menu-item">
+      <div class="item-info">
+        <div class="item-name">${item.name}</div>
+        ${item.description ? `<div class="item-desc">${item.description}</div>` : ''}
+        ${item.translation ? `<div class="item-translation">${item.translation}</div>` : ''}
+      </div>
+      <div class="item-price">${formatPrice(item.price)}</div>
+    </div>`;
+        }
+
+        function renderItems(containerId, items) {
+            const el = document.getElementById(containerId);
+            if (!el) return;
+            el.innerHTML = items.filter(i => i.active).map(renderItem).join('');
+        }
+
+        async function loadMenu() {
+            renderItems('entrees-items', MENU_DATA.entrees);
+            renderItems('mer-items', MENU_DATA.mer);
+            renderItems('terre-items', MENU_DATA.terre);
+            renderItems('desserts-items', MENU_DATA.desserts);
+        }
+
+        function showSection(id, clickedTab) {
+            document.querySelectorAll('.menu-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(id)?.classList.add('active');
+            if (clickedTab) clickedTab.classList.add('active');
+            else {
+                const tabs = ['cover', 'entrees', 'principales', 'desserts'];
+                const idx = tabs.indexOf(id);
+                document.querySelectorAll('.nav-tab')[idx]?.classList.add('active');
+            }
+        }
+
+        /* ─── PDF DOWNLOAD — Faithful reproduction ────────────── */
+        async function downloadPDF() {
+            const activeSection = document.querySelector('.menu-section.active');
+            if (!activeSection || activeSection.id === 'cover') {
+                showToast('Seleccioná una sección para descargar');
+                return;
+            }
+
+            showToast('Generando PDF...');
+
+            try {
+                const { jsPDF } = window.jspdf;
+
+                // Ensure all logo images are loaded before capture
+                const imgs = activeSection.querySelectorAll('img');
+                await Promise.all([...imgs].map(img => {
+                    if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+                    return new Promise(resolve => {
+                        img.onload = resolve;
+                        img.onerror = resolve;
+                    });
+                }));
+
+                // Small delay for rendering
+                await new Promise(r => setTimeout(r, 200));
+
+                const canvas = await html2canvas(activeSection, {
+                    scale: 3,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#FFFFFF',
+                    logging: false,
+                    imageTimeout: 5000,
+                });
+
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+                const pageWidth = pdf.internal.pageSize.getWidth();
+                const pageHeight = pdf.internal.pageSize.getHeight();
+                const margin = 12;
+                const maxW = pageWidth - margin * 2;
+                const ratio = canvas.height / canvas.width;
+                const imgH = maxW * ratio;
+
+                if (imgH <= pageHeight - margin * 2) {
+                    // Single page
+                    pdf.addImage(imgData, 'PNG', margin, margin, maxW, imgH);
+                } else {
+                    // Multi-page: slice canvas cleanly
+                    const usableH = pageHeight - margin * 2;
+                    const srcSliceH = Math.floor((canvas.width * usableH) / maxW);
+                    let srcY = 0;
+                    let pageNum = 0;
+
+                    while (srcY < canvas.height) {
+                        if (pageNum > 0) pdf.addPage();
+
+                        const sliceCanvas = document.createElement('canvas');
+                        const sliceH = Math.min(srcSliceH, canvas.height - srcY);
+                        sliceCanvas.width = canvas.width;
+                        sliceCanvas.height = sliceH;
+                        const ctx = sliceCanvas.getContext('2d');
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+                        ctx.drawImage(canvas, 0, srcY, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
+
+                        const sliceData = sliceCanvas.toDataURL('image/png');
+                        const drawH = maxW * (sliceH / canvas.width);
+                        pdf.addImage(sliceData, 'PNG', margin, margin, maxW, drawH);
+
+                        srcY += srcSliceH;
+                        pageNum++;
+                    }
+                }
+
+                const title = activeSection.dataset.title || 'menu';
+                pdf.save(`Chez-Manu_${title.replace(/\s+/g, '-')}.pdf`);
+                showToast('✓ PDF descargado');
+            } catch (e) {
+                console.error(e);
+                showToast('Error al generar PDF');
+            }
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2800);
+        }
+
+        document.addEventListener('DOMContentLoaded', loadMenu);
+    </script>
+</body>
+
+</html>
