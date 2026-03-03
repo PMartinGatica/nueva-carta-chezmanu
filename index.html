@@ -36,9 +36,12 @@
 
         body {
             font-family: 'Cormorant Garamond', Georgia, serif;
-            background: var(--cream);
+            background: #FFFFFF; /* Cambiado de --cream a blanco nítido */
             color: var(--ink);
             min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
         }
 
         /* ─── LOGO ─────────────────────────────────────────────── */
@@ -79,8 +82,10 @@
             font-family: 'Cinzel', serif;
             color: var(--gold);
             font-size: 1.1rem;
+            font-weight: 600;
             letter-spacing: .18em;
             text-transform: uppercase;
+            text-shadow: 0 0 1px rgba(201, 168, 76, 0.4);
         }
 
         .nav-tabs {
@@ -91,6 +96,7 @@
         .nav-tab {
             font-family: 'Cinzel', serif;
             font-size: .72rem;
+            font-weight: 600;
             letter-spacing: .12em;
             color: var(--gold-light);
             background: transparent;
@@ -116,6 +122,7 @@
         .btn-pdf {
             font-family: 'Cinzel', serif;
             font-size: .65rem;
+            font-weight: 600;
             letter-spacing: .12em;
             color: var(--ink);
             background: var(--gold);
@@ -270,15 +277,18 @@
             color: var(--ink);
             line-height: 1.35;
             margin-bottom: .25rem;
+            letter-spacing: 0.01em;
         }
 
         .item-desc {
             font-family: 'Cormorant Garamond', serif;
-            font-size: .95rem;
-            color: var(--ink-light);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--ink);
             font-style: normal;
             line-height: 1.5;
             margin-bottom: .15rem;
+            letter-spacing: .01em;
         }
 
         .item-translation {
@@ -306,8 +316,9 @@
             padding-top: 2rem;
             border-top: 1px solid var(--divider);
             font-family: 'Cormorant Garamond', serif;
-            font-size: .85rem;
-            color: var(--ink-light);
+            font-size: .95rem;
+            font-weight: 700;
+            color: var(--ink);
             font-style: italic;
             letter-spacing: .04em;
         }
@@ -657,8 +668,11 @@
                 // Small delay for rendering
                 await new Promise(r => setTimeout(r, 200));
 
+                // Ensure fonts are loaded
+                await document.fonts.ready;
+
                 const canvas = await html2canvas(activeSection, {
-                    scale: 3,
+                    scale: 4, // Increased from 3 for better sharpness
                     useCORS: true,
                     allowTaint: true,
                     backgroundColor: '#FFFFFF',
