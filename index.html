@@ -23,7 +23,13 @@
             --ink-light: #4A3F35;
             --gold: #C9A84C;
             --gold-light: #E8D5A3;
-            --divider: #D4C4A8;
+            --divider:       #D4C4A8;
+            --green-blanco:  #4A6B14;
+            --green-espum:   #7A9420;
+            --purple-tinto:  #6B1A45;
+            --blue-copa:     #2A6080;
+            --gold-champ:    #8B6914;
+            --pink-rosado:   #9E4060;
         }
 
         *,
@@ -36,12 +42,18 @@
 
         body {
             font-family: 'Cormorant Garamond', Georgia, serif;
-            background: #FFFFFF; /* Cambiado de --cream a blanco nítido */
+            background: #FFFFFF;
             color: var(--ink);
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             text-rendering: optimizeLegibility;
+        }
+
+        /* Fondo blanco explícito — evita sangrado del --cream en captura PDF */
+        main, .menu-section, .page-header, .page-footer,
+        .menu-item, .category-header {
+            background: #FFFFFF;
         }
 
         /* ─── LOGO ─────────────────────────────────────────────── */
@@ -70,41 +82,52 @@
             top: 0;
             z-index: 100;
             background: var(--ink);
+            border-bottom: 2px solid var(--gold);
+            /* Desktop: single row */
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 2.5rem;
-            height: 56px;
-            border-bottom: 2px solid var(--gold);
+            padding: 0 2rem;
+            height: 52px;
         }
 
         .nav-brand {
             font-family: 'Cinzel', serif;
             color: var(--gold);
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 600;
             letter-spacing: .18em;
             text-transform: uppercase;
-            text-shadow: 0 0 1px rgba(201, 168, 76, 0.4);
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .nav-tabs {
             display: flex;
-            gap: .25rem;
+            gap: .15rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            flex: 1;
+            justify-content: center;
+            padding: 0 .5rem;
         }
+        .nav-tabs::-webkit-scrollbar { display: none; }
 
         .nav-tab {
             font-family: 'Cinzel', serif;
-            font-size: .72rem;
+            font-size: .68rem;
             font-weight: 600;
-            letter-spacing: .12em;
+            letter-spacing: .1em;
             color: var(--gold-light);
             background: transparent;
             border: 1px solid transparent;
-            padding: .45rem 1.1rem;
+            padding: .4rem .9rem;
             cursor: pointer;
             transition: all .2s;
             text-transform: uppercase;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .nav-tab:hover,
@@ -114,36 +137,29 @@
             border-color: var(--gold);
         }
 
-        .nav-actions {
-            display: flex;
-            gap: .75rem;
-        }
+        .nav-actions { flex-shrink: 0; }
 
         .btn-pdf {
             font-family: 'Cinzel', serif;
-            font-size: .65rem;
+            font-size: .62rem;
             font-weight: 600;
-            letter-spacing: .12em;
+            letter-spacing: .1em;
             color: var(--ink);
             background: var(--gold);
             border: none;
-            padding: .45rem 1.2rem;
+            padding: .4rem 1rem;
             cursor: pointer;
             transition: opacity .2s;
             text-transform: uppercase;
             display: flex;
             align-items: center;
-            gap: .4rem;
+            gap: .35rem;
+            white-space: nowrap;
         }
 
-        .btn-pdf:hover {
-            opacity: .8;
-        }
+        .btn-pdf:hover { opacity: .8; }
 
-        .btn-pdf svg {
-            width: 13px;
-            height: 13px;
-        }
+        .btn-pdf svg { width: 12px; height: 12px; }
 
         /* ─── MAIN ─────────────────────────────────────────────── */
         main {
@@ -245,6 +261,54 @@
 
         .cat-single {
             color: var(--ink);
+        }
+
+        /* ─── WINE CATEGORIES ──────────────────────────────────── */
+        .cat-blanco { color: var(--green-blanco); }
+        .cat-espum  { color: var(--green-espum); }
+        .cat-tinto  { color: var(--purple-tinto); }
+        .cat-copa   { color: var(--blue-copa); }
+        .cat-champ  { color: var(--gold-champ); }
+        .cat-rosado { color: var(--pink-rosado); }
+
+        /* ─── WINE VARIETAL (sub-header de uva) ────────────────── */
+        .wine-varietal {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: .92rem;
+            font-weight: 600;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            margin: 1.5rem 0 .4rem;
+            padding-bottom: .3rem;
+        }
+        .wine-varietal.blanco { color: var(--green-blanco); border-bottom: 1px solid #C0D490; }
+        .wine-varietal.espum  { color: var(--green-espum);  border-bottom: 1px solid #C0D490; }
+        .wine-varietal.tinto  { color: var(--purple-tinto); border-bottom: 1px solid #C8A0B8; }
+        .wine-varietal.copa   { color: var(--blue-copa);    border-bottom: 1px solid #A0BED0; }
+        .wine-varietal.champ  { color: var(--gold-champ);   border-bottom: 1px solid #D4B870; }
+        .wine-varietal.rosado { color: var(--pink-rosado);  border-bottom: 1px solid #D4A0B0; }
+
+        /* ─── WINE ITEM ─────────────────────────────────────────── */
+        .wine-item {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 0 2rem;
+            padding: .8rem 0;
+            border-bottom: 1px solid #F0EAE0;
+            align-items: center;
+            background: #FFFFFF;
+            transition: background .15s;
+        }
+        .wine-item:hover {
+            background: rgba(201, 168, 76, .04);
+            padding-left: .5rem; padding-right: .5rem;
+            margin: 0 -.5rem; border-radius: 2px;
+        }
+        .wine-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+            color: var(--ink);
+            line-height: 1.3;
         }
 
         /* ─── MENU ITEM ────────────────────────────────────────── */
@@ -440,31 +504,67 @@
             transform: translateY(0);
         }
 
-        /* ─── RESPONSIVE ───────────────────────────────────────── */
+        /* ─── RESPONSIVE — Mobile First ────────────────────────── */
         @media (max-width: 640px) {
+
+            /* Nav: 2 filas en mobile */
             .nav {
-                padding: 0 1rem;
                 flex-wrap: wrap;
                 height: auto;
-                padding: .75rem 1rem;
-                gap: .5rem;
+                padding: 0;
+                gap: 0;
             }
 
+            /* Fila 1: brand + pdf */
+            .nav-brand {
+                order: 1;
+                padding: .6rem 1rem;
+                font-size: .85rem;
+            }
+
+            .nav-actions {
+                order: 2;
+                padding: .5rem 1rem;
+            }
+
+            /* Fila 2: tabs scrolleables, ancho completo */
             .nav-tabs {
-                overflow-x: auto;
+                order: 3;
+                width: 100%;
+                justify-content: flex-start;
+                padding: 0 .5rem .5rem;
+                border-top: 1px solid rgba(201,168,76,.2);
+                gap: .2rem;
             }
 
-            .section-title {
-                font-size: 2rem;
+            .nav-tab {
+                font-size: .62rem;
+                padding: .35rem .7rem;
+                letter-spacing: .08em;
             }
 
-            .item-name {
-                font-size: 1.05rem;
+            .btn-pdf {
+                font-size: .6rem;
+                padding: .35rem .8rem;
             }
 
+            /* Contenido */
             main {
-                padding: 2rem 1.2rem 5rem;
+                padding: 1.5rem 1rem 5rem;
             }
+
+            .section-title { font-size: 1.9rem; }
+            .item-name     { font-size: 1rem; }
+            .item-price    { font-size: 1rem; }
+            .wine-name     { font-size: 1rem; }
+
+            .category-header { margin: 2rem 0 1.4rem; }
+            .menu-item { padding: 1.1rem 0; }
+
+            .cover { padding: 3rem .5rem; gap: 1.2rem; }
+            .cover-title { font-size: 2.8rem; }
+            .cover-nav { gap: 1rem; }
+            .cover-btn { padding: .7rem 1.4rem; font-size: .7rem; }
         }
     </style>
 </head>
@@ -478,6 +578,8 @@
             <button class="nav-tab" onclick="showSection('entrees', this)">Entrées</button>
             <button class="nav-tab" onclick="showSection('principales', this)">Principales</button>
             <button class="nav-tab" onclick="showSection('desserts', this)">Desserts</button>
+            <button class="nav-tab" onclick="showSection('vinos', this)">Vins</button>
+        </div>
         </div>
         <div class="nav-actions">
             <button class="btn-pdf" onclick="downloadPDF()" title="Descargar sección como PDF">
@@ -514,6 +616,9 @@
                     <button class="cover-btn"
                         onclick="showSection('desserts', document.querySelector('.nav-tab:nth-child(4)'))">Nos
                         Desserts</button>
+                    <button class="cover-btn"
+                        onclick="showSection('vinos', document.querySelector('.nav-tab:nth-child(5)'))">Carte
+                        des Vins</button>
                 </div>
             </div>
         </section>
@@ -530,7 +635,7 @@
                 <p class="section-subtitle">Entradas · Starters</p>
             </div>
             <div id="entrees-items"></div>
-            <div class="page-footer">Los precios incluyen IVA · Prix TTC · Prices include VAT</div>
+            
         </section>
 
         <!-- PRINCIPALES -->
@@ -548,7 +653,7 @@
             <div id="mer-items"></div>
             <div class="category-header"><span class="category-name cat-terre">La Terre</span></div>
             <div id="terre-items"></div>
-            <div class="page-footer">Los precios incluyen IVA · Prix TTC · Prices include VAT</div>
+            
         </section>
 
         <!-- DESSERTS -->
@@ -565,15 +670,87 @@
             <div class="category-header"><span class="category-name cat-single"
                     style="color: var(--brown-terre)">Postres de saison</span></div>
             <div id="desserts-items"></div>
-            <div class="page-footer">Los precios incluyen IVA · Prix TTC · Prices include VAT</div>
+            
+        </section>
+
+        <!-- VINOS -->
+        <section id="vinos" class="menu-section" data-title="Carte des Vins">
+            <div class="page-header">
+                <div class="logo-container">
+                    <img src="data:image/jpeg;base64,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" alt="Chez Manu" class="logo-img">
+                </div>
+                <div class="restaurant-name">Chez Manu</div>
+                <h2 class="section-title">Carte des Vins</h2>
+                <p class="section-subtitle">Vinos · Wines</p>
+            </div>
+
+            <!-- ESPUMANTE ARGENTINO -->
+            <div class="category-header">
+                <span class="category-name cat-espum">Espumante Argentino</span>
+            </div>
+            <div id="vinos-espum-arg"></div>
+
+            <!-- ESPUMANTE FRANCÉS / CHAMPAGNE -->
+            <div class="category-header" style="margin-top:2rem">
+                <span class="category-name cat-champ">Espumante Francés</span>
+            </div>
+            <div id="vinos-espum-fr"></div>
+
+            <!-- BLANCOS -->
+            <div class="category-header" style="margin-top:2rem">
+                <span class="category-name cat-blanco">Vinos Blancos</span>
+            </div>
+            <div id="vinos-blancos"></div>
+
+            <!-- TINTOS LIGEROS -->
+            <div class="category-header" style="margin-top:2rem">
+                <span class="category-name cat-tinto">Tintos Ligeros &amp; Frutados</span>
+            </div>
+            <div id="vinos-ligeros"></div>
+
+            <!-- TINTOS CUERPO MEDIO -->
+            <div class="category-header" style="margin-top:2rem">
+                <span class="category-name cat-tinto">Tintos de Cuerpo Medio</span>
+            </div>
+            <div id="vinos-medio"></div>
+
+            <!-- TINTOS POTENTES -->
+            <div class="category-header" style="margin-top:2rem">
+                <span class="category-name cat-tinto">Tintos Potentes &amp; Estructurados</span>
+            </div>
+            <div id="vinos-potentes"></div>
+
         </section>
 
     </main>
+
+    <!-- VINOS — se inserta fuera del main original para respetar estructura -->
 
     <div id="toast" class="toast">Generando PDF...</div>
 
     <script>
         const API_BASE = '/api';
+
+        function formatPrice(price) { return '$' + price.toLocaleString('es-AR'); }
+
+        function renderItem(item) {
+            if (!item.active) return '';
+            return `
+    <div class="menu-item">
+      <div class="item-info">
+        <div class="item-name">${item.name}</div>
+        ${item.description ? `<div class="item-desc">${item.description}</div>` : ''}
+        ${item.translation ? `<div class="item-translation">${item.translation}</div>` : ''}
+      </div>
+      <div class="item-price">${formatPrice(item.price)}</div>
+    </div>`;
+        }
+
+        function renderItems(containerId, items) {
+            const el = document.getElementById(containerId);
+            if (!el) return;
+            el.innerHTML = items.filter(i => i.active).map(renderItem).join('');
+        }
 
         const MENU_DATA = {
             entrees: [
@@ -602,25 +779,128 @@
             ]
         };
 
-        function formatPrice(price) { return '$' + price.toLocaleString('es-AR'); }
+        const WINE_DATA = {
+            espumArg: [
+                { name: 'La Posta Nature', price: 40000 },
+                { name: 'Cruzat Cosecha Temprana', price: 48020 },
+            ],
+            espumFr: [
+                {
+                    varietal: 'Espumante',
+                    type: 'champ',
+                    items: [
+                        { name: 'Le Bulle — Chateau La Coste', price: 85000 },
+                    ]
+                },
+                {
+                    varietal: 'Champagne',
+                    type: 'champ',
+                    items: [
+                        { name: 'Veuve Clicquot Brut Yellow Label', price: 350000 },
+                        { name: 'Moët & Chandon Impérial Brut', price: 330000 },
+                    ]
+                },
+            ],
+            blancos: [
+                {
+                    varietal: 'Chardonnay',
+                    type: 'blanco',
+                    items: [
+                        { name: 'Lagarde Chardonnay', price: 26000 },
+                        { name: 'Primogénito Chardonnay', price: 29000 },
+                        { name: 'Escorihuela Gascón Gran Reserva', price: 40000 },
+                        { name: 'Luca Chardonnay', price: 48000 },
+                        { name: 'Angélica Zapata Chardonnay', price: 56000 },
+                        { name: 'Contra Corriente Chardonnay', price: 60000 },
+                        { name: 'Barda Chardonnay', price: 84000 },
+                    ]
+                },
+                {
+                    varietal: 'Sauvignon Blanc',
+                    type: 'blanco',
+                    items: [
+                        { name: 'Trumpeter Sauvignon Blanc', price: 18000 },
+                        { name: 'Wapisa Sauvignon Blanc', price: 22000 },
+                        { name: 'Rutini Sauvignon Blanc', price: 35000 },
+                        { name: 'Luigi Bosca Sauvignon Blanc', price: 45000 },
+                        { name: 'Pequeñas Producciones Sauvignon Blanc', price: 62000 },
+                    ]
+                },
+                {
+                    varietal: 'Torrontés y Naranjos',
+                    type: 'blanco',
+                    items: [
+                        { name: 'Altaland Torrontés', price: 23000 },
+                        { name: 'Amalaya Blanco Bajo Alcohol', price: 27000 },
+                    ]
+                },
+                {
+                    varietal: 'Dulces y Tardíos',
+                    type: 'blanco',
+                    items: [
+                        { name: 'Susana Balbo Late Harvest Malbec', price: 40880 },
+                        { name: 'Mendel Petite Manseng', price: 53200 },
+                    ]
+                },
+                {
+                    varietal: 'Rosado',
+                    type: 'rosado',
+                    items: [
+                        { name: 'Trumpeter Rosé', price: 18860 },
+                    ]
+                },
+            ],
+            ligeros: [
+                { name: 'La Posta Glorieta Pinot Noir', price: 21800 },
+                { name: 'Wapisa Pinot Noir', price: 23500 },
+                { name: 'Primogénito Sangre Azul', price: 39500 },
+                { name: 'Rutini Pinot Noir', price: 48500 },
+                { name: 'Araucana Pinot Noir', price: 53500 },
+                { name: 'Barda Pinot Noir', price: 80000 },
+                { name: 'Rutini Merlot', price: 28500 },
+            ],
+            medio: [
+                { name: 'Trumpeter Cabernet Sauvignon', price: 20500 },
+                { name: 'Aruma Malbec', price: 35500 },
+                { name: 'Carmelo Patti Cabernet Sauvignon', price: 42500 },
+                { name: 'Rutini Malbec', price: 45000 },
+                { name: 'Luca Malbec', price: 48000 },
+                { name: 'Angélica Zapata Alta Malbec', price: 59500 },
+                { name: 'Clos de los 7', price: 29000 },
+                { name: 'Cuvelier Colección Blend', price: 36500 },
+                { name: 'Cuvelier Los Andes', price: 59900 },
+            ],
+            potentes: [
+                { name: 'Escorihuela Gascón Syrah', price: 23000 },
+                { name: 'San Pedro de Yacochuya Malbec', price: 50500 },
+                { name: 'El Gran Enemigo Cabernet Franc', price: 74900 },
+                { name: 'Luca Beso de Dante', price: 74500 },
+                { name: 'MEG Escorihuela Gascón', price: 62500 },
+                { name: 'Escorihuela Gascón Gran Reserva', price: 82500 },
+            ],
+        };
 
-        function renderItem(item) {
-            if (!item.active) return '';
-            return `
-    <div class="menu-item">
-      <div class="item-info">
-        <div class="item-name">${item.name}</div>
-        ${item.description ? `<div class="item-desc">${item.description}</div>` : ''}
-        ${item.translation ? `<div class="item-translation">${item.translation}</div>` : ''}
-      </div>
-      <div class="item-price">${formatPrice(item.price)}</div>
-    </div>`;
-        }
-
-        function renderItems(containerId, items) {
+        function renderWineVarietals(containerId, groups) {
             const el = document.getElementById(containerId);
             if (!el) return;
-            el.innerHTML = items.filter(i => i.active).map(renderItem).join('');
+            el.innerHTML = groups.map(g => `
+                <div class="wine-varietal ${g.type}">${g.varietal}</div>
+                ${g.items.map(i => `
+                <div class="wine-item">
+                    <span class="wine-name">${i.name}</span>
+                    <span class="item-price">${formatPrice(i.price)}</span>
+                </div>`).join('')}
+            `).join('');
+        }
+
+        function renderWineFlat(containerId, items) {
+            const el = document.getElementById(containerId);
+            if (!el) return;
+            el.innerHTML = items.map(i => `
+                <div class="wine-item">
+                    <span class="wine-name">${i.name}</span>
+                    <span class="item-price">${formatPrice(i.price)}</span>
+                </div>`).join('');
         }
 
         async function loadMenu() {
@@ -628,6 +908,13 @@
             renderItems('mer-items', MENU_DATA.mer);
             renderItems('terre-items', MENU_DATA.terre);
             renderItems('desserts-items', MENU_DATA.desserts);
+            // Vinos
+            renderWineFlat(     'vinos-espum-arg', WINE_DATA.espumArg);
+            renderWineVarietals('vinos-espum-fr',  WINE_DATA.espumFr);
+            renderWineVarietals('vinos-blancos',   WINE_DATA.blancos);
+            renderWineFlat(     'vinos-ligeros',   WINE_DATA.ligeros);
+            renderWineFlat(     'vinos-medio',     WINE_DATA.medio);
+            renderWineFlat(     'vinos-potentes',  WINE_DATA.potentes);
         }
 
         function showSection(id, clickedTab) {
@@ -636,13 +923,108 @@
             document.getElementById(id)?.classList.add('active');
             if (clickedTab) clickedTab.classList.add('active');
             else {
-                const tabs = ['cover', 'entrees', 'principales', 'desserts'];
+                const tabs = ['cover', 'entrees', 'principales', 'desserts', 'vinos'];
                 const idx = tabs.indexOf(id);
                 document.querySelectorAll('.nav-tab')[idx]?.classList.add('active');
             }
         }
 
-        /* ─── PDF DOWNLOAD — Faithful reproduction ────────────── */
+        /* ─── PDF DOWNLOAD — Clean white clone approach ──────── */
+        /* ── Shared: captura un elemento DOM → canvas ── */
+        async function captureFrame(html) {
+            const frame = document.createElement('div');
+            frame.id = 'pdf-clone';
+            frame.style.cssText = [
+                'position:fixed', 'left:-9999px', 'top:0',
+                'width:794px', 'background:#FFFFFF', 'color:#1A1410',
+                'padding:48px 56px 56px',
+                'font-family:"Cormorant Garamond",Georgia,serif',
+                'box-sizing:border-box',
+            ].join(';');
+            frame.innerHTML = html;
+            document.body.appendChild(frame);
+            await new Promise(r => setTimeout(r, 80));
+            const canvas = await html2canvas(frame, {
+                scale: 3, useCORS: true, allowTaint: true,
+                backgroundColor: '#FFFFFF', logging: false,
+                imageTimeout: 6000, windowWidth: 794,
+            });
+            document.body.removeChild(frame);
+            return canvas;
+        }
+
+        /* ── Agrega un canvas como página A4 al pdf ──
+           fitToPage=true → escala para entrar en una sola hoja exacta
+           fitToPage=false → slicing multipágina (para secciones largas) ── */
+        function addCanvasPage(pdf, canvas, isFirst, fitToPage = false) {
+            const pageW = pdf.internal.pageSize.getWidth();
+            const pageH = pdf.internal.pageSize.getHeight();
+
+            if (fitToPage) {
+                if (!isFirst) pdf.addPage();
+                const scaleW = pageW / canvas.width;
+                const scaleH = pageH / canvas.height;
+                const scale  = Math.min(scaleW, scaleH);
+                const drawW  = canvas.width  * scale;
+                const drawH  = canvas.height * scale;
+                // Centrar horizontal y verticalmente
+                const offsetX = (pageW - drawW) / 2;
+                const offsetY = (pageH - drawH) / 2;
+                pdf.setFillColor(255, 255, 255);
+                pdf.rect(0, 0, pageW, pageH, 'F');
+                pdf.addImage(canvas.toDataURL('image/png'), 'PNG', offsetX, offsetY > 0 ? offsetY : 0, drawW, drawH);
+                return;
+            }
+
+            // Modo slicing original (otras secciones)
+            const drawW   = pageW;
+            const scale   = drawW / canvas.width;
+            const slicePx = Math.floor(pageH / scale);
+            let srcY = 0, page = 0;
+            while (srcY < canvas.height) {
+                if (!isFirst || page > 0) pdf.addPage();
+                const sliceH = Math.min(slicePx, canvas.height - srcY);
+                const slice  = document.createElement('canvas');
+                slice.width  = canvas.width;
+                slice.height = sliceH;
+                const ctx = slice.getContext('2d');
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, slice.width, slice.height);
+                ctx.drawImage(canvas, 0, srcY, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
+                pdf.addImage(slice.toDataURL('image/png'), 'PNG', 0, 0, drawW, sliceH * scale);
+                srcY += slicePx;
+                page++;
+            }
+        }
+
+        /* ── Construye el HTML de cabecera de página (logo + título) ── */
+        function winePageHeader() {
+            const logoSrc = document.querySelector('#vinos .logo-img')?.src || '';
+            return `
+                <div class="page-header" style="text-align:center;padding-bottom:1.8rem;border-bottom:1px solid #D4C4A8;margin-bottom:2rem;">
+                    <div class="logo-container"><img src="${logoSrc}" style="width:120px;height:auto;"></div>
+                    <div style="font-family:'Cinzel',serif;font-size:.75rem;letter-spacing:.3em;color:#C9A84C;text-transform:uppercase;margin-bottom:.6rem;">Chez Manu</div>
+                    <h2 style="font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:700;color:#C00000;line-height:1.15;margin-bottom:.3rem;">Carte des Vins</h2>
+                    <p style="font-family:'Cormorant Garamond',serif;font-size:1rem;color:#4A3F35;font-style:italic;">Vinos · Wines</p>
+                </div>`;
+        }
+
+        /* ── Toma el innerHTML de un contenedor por ID ── */
+        function wineBlock(id) {
+            return document.getElementById(id)?.innerHTML || '';
+        }
+
+        /* ── Toma el outerHTML del category-header anterior a un div#id ── */
+        function wineCatHeader(id) {
+            const el = document.getElementById(id);
+            if (!el) return '';
+            let prev = el.previousElementSibling;
+            while (prev && !prev.classList.contains('category-header')) {
+                prev = prev.previousElementSibling;
+            }
+            return prev ? prev.outerHTML : '';
+        }
+
         async function downloadPDF() {
             const activeSection = document.querySelector('.menu-section.active');
             if (!activeSection || activeSection.id === 'cover') {
@@ -652,81 +1034,85 @@
 
             showToast('Generando PDF...');
 
+            // Inyectar estilos de impresión una sola vez
+            const style = document.createElement('style');
+            style.textContent = `
+                #pdf-clone, #pdf-clone * { background:#FFFFFF !important; box-shadow:none !important; }
+                #pdf-clone .category-header::before,
+                #pdf-clone .category-header::after { background:#D4C4A8 !important; }
+                #pdf-clone .menu-item  { border-bottom-color:#F0EAE0 !important; }
+                #pdf-clone .wine-item  { border-bottom-color:#F0EAE0 !important; }
+            `;
+            document.head.appendChild(style);
+
             try {
-                const { jsPDF } = window.jspdf;
-
-                // Ensure all logo images are loaded before capture
-                const imgs = activeSection.querySelectorAll('img');
-                await Promise.all([...imgs].map(img => {
-                    if (img.complete && img.naturalWidth > 0) return Promise.resolve();
-                    return new Promise(resolve => {
-                        img.onload = resolve;
-                        img.onerror = resolve;
-                    });
-                }));
-
-                // Small delay for rendering
-                await new Promise(r => setTimeout(r, 200));
-
-                // Ensure fonts are loaded
                 await document.fonts.ready;
-
-                const canvas = await html2canvas(activeSection, {
-                    scale: 4, // Increased from 3 for better sharpness
-                    useCORS: true,
-                    allowTaint: true,
-                    backgroundColor: '#FFFFFF',
-                    logging: false,
-                    imageTimeout: 5000,
-                });
-
-                const imgData = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
                 const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
-                const pageWidth = pdf.internal.pageSize.getWidth();
-                const pageHeight = pdf.internal.pageSize.getHeight();
-                const margin = 12;
-                const maxW = pageWidth - margin * 2;
-                const ratio = canvas.height / canvas.width;
-                const imgH = maxW * ratio;
+                if (activeSection.id === 'vinos') {
+                    // ── VINOS: 4 páginas con contenido específico ──────────
 
-                if (imgH <= pageHeight - margin * 2) {
-                    // Single page
-                    pdf.addImage(imgData, 'PNG', margin, margin, maxW, imgH);
+                    const hdr = winePageHeader();
+
+                    // Pág 1 — Espumante Argentino + Espumante Francés
+                    const p1 = await captureFrame(hdr +
+                        wineCatHeader('vinos-espum-arg') + wineBlock('vinos-espum-arg') +
+                        wineCatHeader('vinos-espum-fr')  + wineBlock('vinos-espum-fr'));
+                    addCanvasPage(pdf, p1, true, true);
+
+                    // Pág 2 — Blancos (incluye Rosado dentro de sus varietales)
+                    const p2 = await captureFrame(hdr +
+                        wineCatHeader('vinos-blancos') + wineBlock('vinos-blancos'));
+                    addCanvasPage(pdf, p2, false, true);
+
+                    // Pág 3 — Tintos Ligeros + Tintos Cuerpo Medio
+                    const p3 = await captureFrame(hdr +
+                        wineCatHeader('vinos-ligeros') + wineBlock('vinos-ligeros') +
+                        wineCatHeader('vinos-medio')   + wineBlock('vinos-medio'));
+                    addCanvasPage(pdf, p3, false, true);
+
+                    // Pág 4 — Tintos Potentes
+                    const p4 = await captureFrame(hdr +
+                        wineCatHeader('vinos-potentes') + wineBlock('vinos-potentes'));
+                    addCanvasPage(pdf, p4, false, true);
+
+                    pdf.save('Chez-Manu_Carte-des-Vins.pdf');
+
                 } else {
-                    // Multi-page: slice canvas cleanly
-                    const usableH = pageHeight - margin * 2;
-                    const srcSliceH = Math.floor((canvas.width * usableH) / maxW);
-                    let srcY = 0;
-                    let pageNum = 0;
+                    // ── RESTO DE SECCIONES: flujo original ────────────────
+                    const frame = document.createElement('div');
+                    frame.id = 'pdf-clone';
+                    frame.style.cssText = [
+                        'position:fixed', 'left:-9999px', 'top:0',
+                        'width:794px', 'background:#FFFFFF', 'color:#1A1410',
+                        'padding:48px 56px 56px',
+                        'font-family:"Cormorant Garamond",Georgia,serif',
+                        'box-sizing:border-box',
+                    ].join(';');
+                    frame.innerHTML = activeSection.innerHTML;
+                    document.body.appendChild(frame);
+                    await new Promise(r => setTimeout(r, 150));
 
-                    while (srcY < canvas.height) {
-                        if (pageNum > 0) pdf.addPage();
+                    const canvas = await html2canvas(frame, {
+                        scale: 3, useCORS: true, allowTaint: true,
+                        backgroundColor: '#FFFFFF', logging: false,
+                        imageTimeout: 6000, windowWidth: 794,
+                    });
+                    document.body.removeChild(frame);
+                    addCanvasPage(pdf, canvas, true);
 
-                        const sliceCanvas = document.createElement('canvas');
-                        const sliceH = Math.min(srcSliceH, canvas.height - srcY);
-                        sliceCanvas.width = canvas.width;
-                        sliceCanvas.height = sliceH;
-                        const ctx = sliceCanvas.getContext('2d');
-                        ctx.fillStyle = '#FFFFFF';
-                        ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
-                        ctx.drawImage(canvas, 0, srcY, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
-
-                        const sliceData = sliceCanvas.toDataURL('image/png');
-                        const drawH = maxW * (sliceH / canvas.width);
-                        pdf.addImage(sliceData, 'PNG', margin, margin, maxW, drawH);
-
-                        srcY += srcSliceH;
-                        pageNum++;
-                    }
+                    const title = activeSection.dataset.title || 'menu';
+                    pdf.save(`Chez-Manu_${title.replace(/\s+/g, '-')}.pdf`);
                 }
 
-                const title = activeSection.dataset.title || 'menu';
-                pdf.save(`Chez-Manu_${title.replace(/\s+/g, '-')}.pdf`);
                 showToast('✓ PDF descargado');
+
             } catch (e) {
                 console.error(e);
                 showToast('Error al generar PDF');
+            } finally {
+                document.head.removeChild(style);
             }
         }
 
