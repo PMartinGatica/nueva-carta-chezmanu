@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chez Manu — Setup Automático</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:wght@400;600&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            background: #1A1410;
+            color: #F9F5EE;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 90%;
+            background: #2A231D;
+            border: 1px solid #C9A84C;
+            border-radius: 8px;
+            padding: 3rem 2.5rem;
+            text-align: center;
+        }
+
+        h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 2rem;
+            color: #C9A84C;
+            letter-spacing: .15em;
+            margin-bottom: .5rem;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #8A7A6A;
+            font-style: italic;
+            margin-bottom: 2rem;
+        }
+
+        .status {
+            font-size: 1.1rem;
+            min-height: 3rem;
+            margin: 1.5rem 0;
+            line-height: 1.6;
+        }
+
+        .status.ok { color: #7ABF5E; }
+        .status.error { color: #E06060; }
+        .status.loading { color: #C9A84C; }
+
+        .btn {
+            font-family: 'Cinzel', serif;
+            font-size: .85rem;
+            font-weight: 600;
+            letter-spacing: .12em;
+            color: #1A1410;
+            background: #C9A84C;
+            border: none;
+            padding: 1rem 2.5rem;
+            cursor: pointer;
+            transition: all .25s;
+            text-transform: uppercase;
+            border-radius: 4px;
+        }
+
+        .btn:hover { background: #E8D5A3; }
+        .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+        .info {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #3A332D;
+            font-size: .9rem;
+            color: #8A7A6A;
+            line-height: 1.8;
+        }
+
+        .info code {
+            background: #1A1410;
+            color: #C9A84C;
+            padding: .15rem .4rem;
+            border-radius: 3px;
+            font-size: .85em;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #C9A84C;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+            vertical-align: middle;
+            margin-right: .5rem;
+        }
+
+        .step-list {
+            text-align: left;
+            margin: 1.5rem 0;
+            padding-left: 1.5rem;
+        }
+
+        .step-list li {
+            margin-bottom: .5rem;
+            color: #B0A090;
+        }
+
+        .step-list li.done { color: #7ABF5E; }
+        .step-list li.active { color: #C9A84C; font-weight: 600; }
+        .step-list li.pending { color: #5A5040; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍽️ Chez Manu</h1>
+        <p class="subtitle">Setup automático del Google Sheet</p>
+
+        <ol class="step-list" id="steps">
+            <li id="step1" class="pending">Conectar con Google Apps Script</li>
+            <li id="step2" class="pending">Crear hojas y estructura</li>
+            <li id="step3" class="pending">Cargar datos iniciales del menú</li>
+            <li id="step4" class="pending">Verificar respuesta de la API</li>
+        </ol>
+
+        <div class="status" id="status">
+            Hacé clic en el botón para configurar el spreadsheet automáticamente.
+        </div>
+
+        <button class="btn" id="setupBtn" onclick="runSetup()">
+            Ejecutar Setup
+        </button>
+
+        <div class="info">
+            <strong>¿Qué hace este script?</strong><br>
+            Llama al endpoint <code>?action=setup</code> de tu Apps Script, que:<br>
+            1. Crea las 6 hojas con headers y formatos<br>
+            2. Carga la carta completa con datos iniciales<br>
+            3. Configura validaciones y protecciones<br><br>
+            <strong>⚠️ Requisito previo:</strong> El <code>Code.gs</code> debe estar 
+            pegado y desplegado en Apps Script antes de usar este setup.
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyD3VRTop83T9qbhvr9CxgWhXocK_t6qBsviDLJQC-ilGGl_8TCGkrW9KjqaYsH4IbYew/exec';
+
+        function setStep(stepNum, state) {
+            const el = document.getElementById('step' + stepNum);
+            el.className = state; // 'done', 'active', 'pending', ''
+        }
+
+        function setStatus(msg, type) {
+            const el = document.getElementById('status');
+            el.innerHTML = msg;
+            el.className = 'status ' + type;
+        }
+
+        async function runSetup() {
+            const btn = document.getElementById('setupBtn');
+            btn.disabled = true;
+            btn.textContent = 'Ejecutando...';
+
+            try {
+                // Step 1: Conectar
+                setStep(1, 'active');
+                setStatus('<span class="spinner"></span> Conectando con Apps Script...', 'loading');
+
+                const setupRes = await fetch(API_URL + '?action=setup');
+                setStep(1, 'done');
+
+                // Step 2-3: Setup & Seed
+                setStep(2, 'active');
+                setStep(3, 'active');
+                setStatus('<span class="spinner"></span> Procesando respuesta...', 'loading');
+
+                const setupJson = await setupRes.json();
+                
+                if (!setupJson.ok) {
+                    throw new Error(setupJson.error || 'Error desconocido en setup');
+                }
+
+                setStep(2, 'done');
+                setStep(3, 'done');
+
+                // Step 4: Verificar
+                setStep(4, 'active');
+                setStatus('<span class="spinner"></span> Verificando datos del menú...', 'loading');
+
+                const menuRes = await fetch(API_URL + '?action=menu');
+                const menuJson = await menuRes.json();
+
+                if (!menuJson.ok) {
+                    throw new Error('El menú no responde correctamente');
+                }
+
+                const data = menuJson.data;
+                const counts = {
+                    entradas: data.entrees?.length || 0,
+                    mar: data.mer?.length || 0,
+                    tierra: data.terre?.length || 0,
+                    postres: data.desserts?.length || 0,
+                    vinosCategorias: Object.keys(data.vinos || {}).length,
+                };
+
+                setStep(4, 'done');
+
+                const message = setupJson.data?.message || '✅ Setup completado';
+                setStatus(`
+                    ✅ <strong>¡Setup completado!</strong><br><br>
+                    ${message}<br><br>
+                    <strong>Datos cargados:</strong><br>
+                    • ${counts.entradas} entradas<br>
+                    • ${counts.mar} platos de mar<br>
+                    • ${counts.tierra} platos de tierra<br>
+                    • ${counts.postres} postres<br>
+                    • ${counts.vinosCategorias} categorías de vinos<br><br>
+                    Ya podés abrir <code>index.html</code> — va a cargar todo desde la API.
+                `, 'ok');
+
+                btn.textContent = '✅ Completado';
+
+            } catch (err) {
+                console.error(err);
+                setStatus(`❌ <strong>Error:</strong> ${err.message}<br><br>
+                    Verificá que el <code>Code.gs</code> esté desplegado como Web App 
+                    y que el acceso sea "Cualquiera".`, 'error');
+                btn.textContent = 'Reintentar';
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -729,155 +729,44 @@
     <div id="toast" class="toast">Generando PDF...</div>
 
     <script>
-        const API_BASE = '/api';
+        /* ════════════════════════════════════════════════════
+           API CONFIG — URL del Apps Script desplegado
+           ════════════════════════════════════════════════════ */
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyD3VRTop83T9qbhvr9CxgWhXocK_t6qBsviDLJQC-ilGGl_8TCGkrW9KjqaYsH4IbYew/exec';
 
         function formatPrice(price) { return '$' + price.toLocaleString('es-AR'); }
 
         function renderItem(item) {
-            if (!item.active) return '';
             return `
     <div class="menu-item">
       <div class="item-info">
-        <div class="item-name">${item.name}</div>
-        ${item.description ? `<div class="item-desc">${item.description}</div>` : ''}
-        ${item.translation ? `<div class="item-translation">${item.translation}</div>` : ''}
+        <div class="item-name">${item.nombre}</div>
+        ${item.descripcion ? `<div class="item-desc">${item.descripcion}</div>` : ''}
+        ${item.traduccion ? `<div class="item-translation">${item.traduccion}</div>` : ''}
       </div>
-      <div class="item-price">${formatPrice(item.price)}</div>
+      <div class="item-price">${formatPrice(item.precio)}</div>
     </div>`;
         }
 
         function renderItems(containerId, items) {
             const el = document.getElementById(containerId);
             if (!el) return;
-            el.innerHTML = items.filter(i => i.active).map(renderItem).join('');
+            el.innerHTML = items.map(renderItem).join('');
         }
 
-        const MENU_DATA = {
-            entrees: [
-                { id: 1, name: "Cojinova ahumada con pickles de salicornia", translation: "Smoked wreckfish with salicornia pickles", price: 32000, active: true },
-                { id: 2, name: "Centolla con Vieiras marinadas en agua de mar", translation: "King Crab with gently seawater-marinated scallops", price: 45000, active: true },
-                { id: 3, name: "Carpaccio de peceto de cordero, hojas verdes y queso de oveja", translation: "Lamb Carpaccio with green leaves and sheep's cheese", price: 28500, active: true },
-                { id: 4, name: "Terrina de cerdo \"de ma grand-mère\", jamón crudo y quesos", translation: "Grandmother's pork terrine with cured ham and cheeses", price: 39000, active: true },
-            ],
-            mer: [
-                { id: 5, name: "Merluza negra cocida en agua de mar", translation: "Patagonian toothfish gently cooked in seawater", price: 61500, active: true },
-                { id: 6, name: "Vieiras gratinadas del Atlántico Sur", translation: "South Atlantic Scallops au gratin", price: 40200, active: true },
-                { id: 7, name: "Risotto de hongos patagónicos", translation: "Patagonian wild mushroom risotto", price: 38000, active: true },
-            ],
-            terre: [
-                { id: 8, name: "Dúo de cordero \"Chez Manu\"", translation: "Lamb duo \"Chez Manu\" style", price: 42500, active: true },
-                { id: 9, name: "Ojo de bife con hongos patagónicos", translation: "Ribeye steak with Patagonian mushrooms", price: 46000, active: true },
-                { id: 10, name: "Solomillo de cerdo con mostaza Dijon", translation: "Pork tenderloin with Dijon mustard", price: 40000, active: true },
-            ],
-            desserts: [
-                { id: 11, name: "Crème brûlée \"tradition\"", description: "(crema aromatizada de vainilla)", price: 11500, active: true },
-                { id: 12, name: "Tarte Tatin de manzana y helado de vainilla", price: 14000, active: true },
-                { id: 13, name: "Pera épicée en infusión de calafate, helado de mascarpone", translation: "Spiced pear in calafate infusion", price: 13800, active: true },
-                { id: 14, name: "Fuego sobre el glaciar", description: "(helado recubierto en merengue, flambée)", translation: "\"Fire over the Glacier\" — Ice cream coated in meringue, flambéed", price: 10500, active: true },
-                { id: 15, name: "Tarta de chocolate caliente y helado", translation: "Hot chocolate cake and ice cream", price: 15600, active: true },
-                { id: 16, name: "Copa de Helado artesanal", price: 9000, active: true },
-            ]
+        /* ── Mapa de categorías de vinos → ID del contenedor + estilo ── */
+        const WINE_CAT_MAP = {
+            'espum-arg': { containerId: 'vinos-espum-arg', type: 'espum' },
+            'espum-fr':  { containerId: 'vinos-espum-fr',  type: 'champ' },
+            'blancos':   { containerId: 'vinos-blancos',   type: 'blanco' },
+            'ligeros':   { containerId: 'vinos-ligeros',   type: 'tinto' },
+            'medio':     { containerId: 'vinos-medio',     type: 'tinto' },
+            'potentes':  { containerId: 'vinos-potentes',  type: 'tinto' },
         };
 
-        const WINE_DATA = {
-            espumArg: [
-                { name: 'La Posta Nature', price: 40000 },
-                { name: 'Cruzat Cosecha Temprana', price: 48020 },
-            ],
-            espumFr: [
-                {
-                    varietal: 'Espumante',
-                    type: 'champ',
-                    items: [
-                        { name: 'Le Bulle — Chateau La Coste', price: 85000 },
-                    ]
-                },
-                {
-                    varietal: 'Champagne',
-                    type: 'champ',
-                    items: [
-                        { name: 'Veuve Clicquot Brut Yellow Label', price: 350000 },
-                        { name: 'Moët & Chandon Impérial Brut', price: 330000 },
-                    ]
-                },
-            ],
-            blancos: [
-                {
-                    varietal: 'Chardonnay',
-                    type: 'blanco',
-                    items: [
-                        { name: 'Lagarde Chardonnay', price: 26000 },
-                        { name: 'Primogénito Chardonnay', price: 29000 },
-                        { name: 'Escorihuela Gascón Gran Reserva', price: 40000 },
-                        { name: 'Luca Chardonnay', price: 48000 },
-                        { name: 'Angélica Zapata Chardonnay', price: 56000 },
-                        { name: 'Contra Corriente Chardonnay', price: 60000 },
-                        { name: 'Barda Chardonnay', price: 84000 },
-                    ]
-                },
-                {
-                    varietal: 'Sauvignon Blanc',
-                    type: 'blanco',
-                    items: [
-                        { name: 'Trumpeter Sauvignon Blanc', price: 18000 },
-                        { name: 'Wapisa Sauvignon Blanc', price: 22000 },
-                        { name: 'Rutini Sauvignon Blanc', price: 35000 },
-                        { name: 'Luigi Bosca Sauvignon Blanc', price: 45000 },
-                        { name: 'Pequeñas Producciones Sauvignon Blanc', price: 62000 },
-                    ]
-                },
-                {
-                    varietal: 'Torrontés y Naranjos',
-                    type: 'blanco',
-                    items: [
-                        { name: 'Altaland Torrontés', price: 23000 },
-                        { name: 'Amalaya Blanco Bajo Alcohol', price: 27000 },
-                    ]
-                },
-                {
-                    varietal: 'Dulces y Tardíos',
-                    type: 'blanco',
-                    items: [
-                        { name: 'Susana Balbo Late Harvest Malbec', price: 40880 },
-                        { name: 'Mendel Petite Manseng', price: 53200 },
-                    ]
-                },
-                {
-                    varietal: 'Rosado',
-                    type: 'rosado',
-                    items: [
-                        { name: 'Trumpeter Rosé', price: 18860 },
-                    ]
-                },
-            ],
-            ligeros: [
-                { name: 'La Posta Glorieta Pinot Noir', price: 21800 },
-                { name: 'Wapisa Pinot Noir', price: 23500 },
-                { name: 'Primogénito Sangre Azul', price: 39500 },
-                { name: 'Rutini Pinot Noir', price: 48500 },
-                { name: 'Araucana Pinot Noir', price: 53500 },
-                { name: 'Barda Pinot Noir', price: 80000 },
-                { name: 'Rutini Merlot', price: 28500 },
-            ],
-            medio: [
-                { name: 'Trumpeter Cabernet Sauvignon', price: 20500 },
-                { name: 'Aruma Malbec', price: 35500 },
-                { name: 'Carmelo Patti Cabernet Sauvignon', price: 42500 },
-                { name: 'Rutini Malbec', price: 45000 },
-                { name: 'Luca Malbec', price: 48000 },
-                { name: 'Angélica Zapata Alta Malbec', price: 59500 },
-                { name: 'Clos de los 7', price: 29000 },
-                { name: 'Cuvelier Colección Blend', price: 36500 },
-                { name: 'Cuvelier Los Andes', price: 59900 },
-            ],
-            potentes: [
-                { name: 'Escorihuela Gascón Syrah', price: 23000 },
-                { name: 'San Pedro de Yacochuya Malbec', price: 50500 },
-                { name: 'El Gran Enemigo Cabernet Franc', price: 74900 },
-                { name: 'Luca Beso de Dante', price: 74500 },
-                { name: 'MEG Escorihuela Gascón', price: 62500 },
-                { name: 'Escorihuela Gascón Gran Reserva', price: 82500 },
-            ],
+        /* ── varietal override de estilo ── */
+        const VARIETAL_TYPE_MAP = {
+            'Rosado': 'rosado',
         };
 
         function renderWineVarietals(containerId, groups) {
@@ -887,8 +776,8 @@
                 <div class="wine-varietal ${g.type}">${g.varietal}</div>
                 ${g.items.map(i => `
                 <div class="wine-item">
-                    <span class="wine-name">${i.name}</span>
-                    <span class="item-price">${formatPrice(i.price)}</span>
+                    <span class="wine-name">${i.nombre}</span>
+                    <span class="item-price">${formatPrice(i.precio)}</span>
                 </div>`).join('')}
             `).join('');
         }
@@ -898,23 +787,85 @@
             if (!el) return;
             el.innerHTML = items.map(i => `
                 <div class="wine-item">
-                    <span class="wine-name">${i.name}</span>
-                    <span class="item-price">${formatPrice(i.price)}</span>
+                    <span class="wine-name">${i.nombre}</span>
+                    <span class="item-price">${formatPrice(i.precio)}</span>
                 </div>`).join('');
         }
 
+        /* ── Transforma la respuesta agrupada de vinos del API ── */
+        function renderVinosFromAPI(vinosData) {
+            // vinosData viene como { categoria: { varietal: [items], '__flat__': [items] } }
+            Object.entries(vinosData).forEach(([cat, varietals]) => {
+                const config = WINE_CAT_MAP[cat];
+                if (!config) return;
+
+                const varietalKeys = Object.keys(varietals);
+                const isFlat = varietalKeys.length === 1 && varietalKeys[0] === '__flat__';
+
+                if (isFlat) {
+                    // Sin varietales — render plano
+                    renderWineFlat(config.containerId, varietals['__flat__']);
+                } else {
+                    // Con varietales — render agrupado
+                    const groups = varietalKeys
+                        .filter(k => k !== '__flat__')
+                        .map(varietal => ({
+                            varietal,
+                            type: VARIETAL_TYPE_MAP[varietal] || config.type,
+                            items: varietals[varietal],
+                        }));
+
+                    // Si hay items sueltos (__flat__) agregarlos al inicio
+                    if (varietals['__flat__'] && varietals['__flat__'].length > 0) {
+                        renderWineFlat(config.containerId, varietals['__flat__']);
+                        // Append varietals after
+                        const el = document.getElementById(config.containerId);
+                        if (el) {
+                            const wrapper = document.createElement('div');
+                            wrapper.innerHTML = groups.map(g => `
+                                <div class="wine-varietal ${g.type}">${g.varietal}</div>
+                                ${g.items.map(i => `
+                                <div class="wine-item">
+                                    <span class="wine-name">${i.nombre}</span>
+                                    <span class="item-price">${formatPrice(i.precio)}</span>
+                                </div>`).join('')}
+                            `).join('');
+                            el.appendChild(wrapper);
+                        }
+                    } else {
+                        renderWineVarietals(config.containerId, groups);
+                    }
+                }
+            });
+        }
+
+        /* ── Carga el menú completo desde la API ── */
         async function loadMenu() {
-            renderItems('entrees-items', MENU_DATA.entrees);
-            renderItems('mer-items', MENU_DATA.mer);
-            renderItems('terre-items', MENU_DATA.terre);
-            renderItems('desserts-items', MENU_DATA.desserts);
-            // Vinos
-            renderWineFlat(     'vinos-espum-arg', WINE_DATA.espumArg);
-            renderWineVarietals('vinos-espum-fr',  WINE_DATA.espumFr);
-            renderWineVarietals('vinos-blancos',   WINE_DATA.blancos);
-            renderWineFlat(     'vinos-ligeros',   WINE_DATA.ligeros);
-            renderWineFlat(     'vinos-medio',     WINE_DATA.medio);
-            renderWineFlat(     'vinos-potentes',  WINE_DATA.potentes);
+            try {
+                showToast('Cargando carta...');
+                const res = await fetch(API_URL + '?action=menu');
+                const json = await res.json();
+
+                if (!json.ok) throw new Error(json.error || 'Error desconocido');
+
+                const data = json.data;
+
+                // Renderizar platos
+                renderItems('entrees-items',  data.entrees);
+                renderItems('mer-items',      data.mer);
+                renderItems('terre-items',    data.terre);
+                renderItems('desserts-items', data.desserts);
+
+                // Renderizar vinos
+                renderVinosFromAPI(data.vinos);
+
+                showToast('✓ Carta cargada');
+            } catch (err) {
+                console.error('Error cargando menú:', err);
+                showToast('⚠ Error al cargar datos. Reintentando...');
+                // Reintento después de 3s
+                setTimeout(loadMenu, 3000);
+            }
         }
 
         function showSection(id, clickedTab) {
@@ -930,14 +881,21 @@
         }
 
         /* ─── PDF DOWNLOAD — Clean white clone approach ──────── */
+        /* ── Tamaño final impreso: 11 × 28 cm ────────────────── */
+        /* Se imprime en A4 y se cortan los laterales.           */
+        /* El contenido se renderiza angosto y centrado.         */
+        const PDF_CUT_W_MM = 110;  // ancho final en mm
+        const PDF_CUT_H_MM = 280;  // alto final en mm
+
         /* ── Shared: captura un elemento DOM → canvas ── */
         async function captureFrame(html) {
             const frame = document.createElement('div');
             frame.id = 'pdf-clone';
             frame.style.cssText = [
                 'position:fixed', 'left:-9999px', 'top:0',
-                'width:794px', 'background:#FFFFFF', 'color:#1A1410',
-                'padding:48px 56px 56px',
+                'width:420px',           // angosto → simula el ancho de 11cm
+                'background:#FFFFFF', 'color:#1A1410',
+                'padding:60px 80px 60px', // padding generoso para centrar
                 'font-family:"Cormorant Garamond",Georgia,serif',
                 'box-sizing:border-box',
             ].join(';');
@@ -947,7 +905,7 @@
             const canvas = await html2canvas(frame, {
                 scale: 3, useCORS: true, allowTaint: true,
                 backgroundColor: '#FFFFFF', logging: false,
-                imageTimeout: 6000, windowWidth: 794,
+                imageTimeout: 6000, windowWidth: 420,
             });
             document.body.removeChild(frame);
             return canvas;
@@ -957,32 +915,39 @@
            fitToPage=true → escala para entrar en una sola hoja exacta
            fitToPage=false → slicing multipágina (para secciones largas) ── */
         function addCanvasPage(pdf, canvas, isFirst, fitToPage = false) {
-            const pageW = pdf.internal.pageSize.getWidth();
-            const pageH = pdf.internal.pageSize.getHeight();
+            const pageW = pdf.internal.pageSize.getWidth();   // 210mm
+            const pageH = pdf.internal.pageSize.getHeight();  // 297mm
+
+            // Área de corte centrada en A4 (11 × 28 cm)
+            const cutX = (pageW - PDF_CUT_W_MM) / 2;  // ~50mm cada lado
+            const cutY = (pageH - PDF_CUT_H_MM) / 2;  // ~8.5mm arriba/abajo
 
             if (fitToPage) {
                 if (!isFirst) pdf.addPage();
-                const scaleW = pageW / canvas.width;
-                const scaleH = pageH / canvas.height;
+                // Escalar el canvas para que entre en el área de 11×28cm
+                const scaleW = PDF_CUT_W_MM / canvas.width;
+                const scaleH = PDF_CUT_H_MM / canvas.height;
                 const scale  = Math.min(scaleW, scaleH);
                 const drawW  = canvas.width  * scale;
                 const drawH  = canvas.height * scale;
-                // Centrar horizontal y verticalmente
-                const offsetX = (pageW - drawW) / 2;
-                const offsetY = (pageH - drawH) / 2;
+                // Centrar dentro del área de corte
+                const offsetX = cutX + (PDF_CUT_W_MM - drawW) / 2;
+                const offsetY = cutY + (PDF_CUT_H_MM - drawH) / 2;
                 pdf.setFillColor(255, 255, 255);
                 pdf.rect(0, 0, pageW, pageH, 'F');
-                pdf.addImage(canvas.toDataURL('image/png'), 'PNG', offsetX, offsetY > 0 ? offsetY : 0, drawW, drawH);
+                pdf.addImage(canvas.toDataURL('image/png'), 'PNG', offsetX, offsetY > cutY ? offsetY : cutY, drawW, drawH);
                 return;
             }
 
-            // Modo slicing original (otras secciones)
-            const drawW   = pageW;
+            // Modo slicing (otras secciones) — centrado en área de corte
+            const drawW   = PDF_CUT_W_MM;
             const scale   = drawW / canvas.width;
-            const slicePx = Math.floor(pageH / scale);
+            const slicePx = Math.floor(PDF_CUT_H_MM / scale);
             let srcY = 0, page = 0;
             while (srcY < canvas.height) {
                 if (!isFirst || page > 0) pdf.addPage();
+                pdf.setFillColor(255, 255, 255);
+                pdf.rect(0, 0, pageW, pageH, 'F');
                 const sliceH = Math.min(slicePx, canvas.height - srcY);
                 const slice  = document.createElement('canvas');
                 slice.width  = canvas.width;
@@ -991,7 +956,7 @@
                 ctx.fillStyle = '#FFFFFF';
                 ctx.fillRect(0, 0, slice.width, slice.height);
                 ctx.drawImage(canvas, 0, srcY, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
-                pdf.addImage(slice.toDataURL('image/png'), 'PNG', 0, 0, drawW, sliceH * scale);
+                pdf.addImage(slice.toDataURL('image/png'), 'PNG', cutX, cutY, drawW, sliceH * scale);
                 srcY += slicePx;
                 page++;
             }
@@ -1001,11 +966,11 @@
         function winePageHeader() {
             const logoSrc = document.querySelector('#vinos .logo-img')?.src || '';
             return `
-                <div class="page-header" style="text-align:center;padding-bottom:1.8rem;border-bottom:1px solid #D4C4A8;margin-bottom:2rem;">
-                    <div class="logo-container"><img src="${logoSrc}" style="width:120px;height:auto;"></div>
-                    <div style="font-family:'Cinzel',serif;font-size:.75rem;letter-spacing:.3em;color:#C9A84C;text-transform:uppercase;margin-bottom:.6rem;">Chez Manu</div>
-                    <h2 style="font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:700;color:#C00000;line-height:1.15;margin-bottom:.3rem;">Carte des Vins</h2>
-                    <p style="font-family:'Cormorant Garamond',serif;font-size:1rem;color:#4A3F35;font-style:italic;">Vinos · Wines</p>
+                <div class="page-header" style="text-align:center;padding-bottom:1.2rem;border-bottom:1px solid #D4C4A8;margin-bottom:1.4rem;">
+                    <div class="logo-container"><img src="${logoSrc}" style="width:90px;height:auto;"></div>
+                    <div style="font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.25em;color:#C9A84C;text-transform:uppercase;margin-bottom:.4rem;">Chez Manu</div>
+                    <h2 style="font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:#C00000;line-height:1.15;margin-bottom:.2rem;">Carte des Vins</h2>
+                    <p style="font-family:'Cormorant Garamond',serif;font-size:.85rem;color:#4A3F35;font-style:italic;">Vinos · Wines</p>
                 </div>`;
         }
 
@@ -1085,8 +1050,9 @@
                     frame.id = 'pdf-clone';
                     frame.style.cssText = [
                         'position:fixed', 'left:-9999px', 'top:0',
-                        'width:794px', 'background:#FFFFFF', 'color:#1A1410',
-                        'padding:48px 56px 56px',
+                        'width:420px',           // angosto para 11cm de corte
+                        'background:#FFFFFF', 'color:#1A1410',
+                        'padding:60px 80px 60px', // márgenes amplios
                         'font-family:"Cormorant Garamond",Georgia,serif',
                         'box-sizing:border-box',
                     ].join(';');
@@ -1097,7 +1063,7 @@
                     const canvas = await html2canvas(frame, {
                         scale: 3, useCORS: true, allowTaint: true,
                         backgroundColor: '#FFFFFF', logging: false,
-                        imageTimeout: 6000, windowWidth: 794,
+                        imageTimeout: 6000, windowWidth: 420,
                     });
                     document.body.removeChild(frame);
                     addCanvasPage(pdf, canvas, true);
