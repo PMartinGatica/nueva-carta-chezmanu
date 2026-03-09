@@ -357,7 +357,7 @@
 
         .item-translation {
             font-family: 'Cormorant Garamond', serif;
-            font-size: .88rem;
+            font-size: 1.05rem;
             color: #8A7A6A;
             font-style: italic;
             line-height: 1.45;
@@ -881,11 +881,10 @@
         }
 
         /* ─── PDF DOWNLOAD — Clean white clone approach ──────── */
-        /* ── Tamaño final impreso: 11 × 28 cm ────────────────── */
-        /* Se imprime en A4 y se cortan los laterales.           */
-        /* El contenido se renderiza angosto y centrado.         */
-        const PDF_CUT_W_MM = 110;  // ancho final en mm
-        const PDF_CUT_H_MM = 280;  // alto final en mm
+        /* ── Tamaño final impreso: A4 (210 × 297 cm) ─────────── */
+        /* Todo el texto se encuentra centrado.                  */
+        const PDF_CUT_W_MM = 210;  // ancho final en mm
+        const PDF_CUT_H_MM = 297;  // alto final en mm
 
         /* ── Shared: captura un elemento DOM → canvas ── */
         async function captureFrame(html) {
@@ -893,9 +892,9 @@
             frame.id = 'pdf-clone';
             frame.style.cssText = [
                 'position:fixed', 'left:-9999px', 'top:0',
-                'width:420px',           // angosto → simula el ancho de 11cm
-                'background:#FFFFFF', 'color:#1A1410',
-                'padding:60px 80px 60px', // padding generoso para centrar
+                'width:800px',           // ancho que simula el A4
+                'background:#FFFFFF', 'color:#000000',
+                'padding:40px 60px', // padding generoso
                 'font-family:"Cormorant Garamond",Georgia,serif',
                 'box-sizing:border-box',
             ].join(';');
@@ -903,9 +902,9 @@
             document.body.appendChild(frame);
             await new Promise(r => setTimeout(r, 80));
             const canvas = await html2canvas(frame, {
-                scale: 3, useCORS: true, allowTaint: true,
+                scale: 2, useCORS: true, allowTaint: true,
                 backgroundColor: '#FFFFFF', logging: false,
-                imageTimeout: 6000, windowWidth: 420,
+                imageTimeout: 6000, windowWidth: 800,
             });
             document.body.removeChild(frame);
             return canvas;
@@ -966,11 +965,9 @@
         function winePageHeader() {
             const logoSrc = document.querySelector('#vinos .logo-img')?.src || '';
             return `
-                <div class="page-header" style="text-align:center;padding-bottom:1.2rem;border-bottom:1px solid #D4C4A8;margin-bottom:1.4rem;">
+                <div class="page-header" style="text-align:center;padding-bottom:1.2rem;border-bottom:none;margin-bottom:1.4rem;">
                     <div class="logo-container"><img src="${logoSrc}" style="width:90px;height:auto;"></div>
-                    <div style="font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.25em;color:#C9A84C;text-transform:uppercase;margin-bottom:.4rem;">Chez Manu</div>
-                    <h2 style="font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:#C00000;line-height:1.15;margin-bottom:.2rem;">Carte des Vins</h2>
-                    <p style="font-family:'Cormorant Garamond',serif;font-size:.85rem;color:#4A3F35;font-style:italic;">Vinos · Wines</p>
+                    <h2 class="section-title" style="font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;line-height:1.15;margin-bottom:.2rem;">Carte des Vins</h2>
                 </div>`;
         }
 
@@ -1002,11 +999,96 @@
             // Inyectar estilos de impresión una sola vez
             const style = document.createElement('style');
             style.textContent = `
-                #pdf-clone, #pdf-clone * { background:#FFFFFF !important; box-shadow:none !important; }
+                #pdf-clone, #pdf-clone * { 
+                    background: #FFFFFF !important; 
+                    box-shadow: none !important; 
+                    color: #000000 !important; 
+                }
                 #pdf-clone .category-header::before,
-                #pdf-clone .category-header::after { background:#D4C4A8 !important; }
-                #pdf-clone .menu-item  { border-bottom-color:#F0EAE0 !important; }
-                #pdf-clone .wine-item  { border-bottom-color:#F0EAE0 !important; }
+                #pdf-clone .category-header::after { 
+                    display: none !important; 
+                }
+                #pdf-clone .menu-item { 
+                    display: flex !important; 
+                    flex-direction: column !important; 
+                    align-items: center !important; 
+                    text-align: center !important; 
+                    border-bottom: none !important; 
+                    padding: 1.5rem 0 !important; 
+                    gap: 0.5rem !important; 
+                }
+                #pdf-clone .item-info { 
+                    width: 100% !important; 
+                    text-align: center !important; 
+                }
+                #pdf-clone .item-name { 
+                    font-size: 1.8rem !important; 
+                    margin-bottom: 0.2rem !important; 
+                    font-weight: bold !important; 
+                }
+                #pdf-clone .item-desc { 
+                    font-size: 1.2rem !important; 
+                    font-weight: normal !important; 
+                    margin-bottom: 0.2rem !important; 
+                }
+                #pdf-clone .item-translation { 
+                    font-size: 1.6rem !important; 
+                    color: #000000 !important; 
+                    font-style: italic !important; 
+                }
+                #pdf-clone .item-price { 
+                    font-size: 1.6rem !important; 
+                    margin-top: 0.2rem !important; 
+                    font-weight: bold !important; 
+                }
+                #pdf-clone .category-header { 
+                    justify-content: center !important; 
+                    margin: 2.5rem 0 1.5rem !important; 
+                }
+                #pdf-clone .category-name { 
+                    font-size: 2.2rem !important; 
+                    font-weight: bold !important;
+                    font-style: normal !important;
+                }
+                #pdf-clone .wine-item { 
+                    display: flex !important; 
+                    flex-direction: column !important; 
+                    align-items: center !important; 
+                    text-align: center !important; 
+                    border-bottom: none !important; 
+                    padding: 1rem 0 !important; 
+                    gap: 0.3rem !important; 
+                }
+                #pdf-clone .wine-name { 
+                    font-size: 1.6rem !important; 
+                    font-weight: bold !important; 
+                }
+                #pdf-clone .wine-varietal { 
+                    text-align: center !important; 
+                    font-size: 1.4rem !important; 
+                    margin: 2.5rem 0 1rem !important; 
+                    border-bottom: none !important; 
+                    font-weight: bold !important; 
+                    letter-spacing: 0.1em !important; 
+                }
+                #pdf-clone .section-title { 
+                    font-size: 2.8rem !important; 
+                    margin-bottom: 0.5rem !important; 
+                    color: #C00000 !important;
+                }
+                #pdf-clone .restaurant-name,
+                #pdf-clone .section-subtitle { 
+                    display: none !important; 
+                }
+                #pdf-clone .page-header { 
+                    border-bottom: none !important; 
+                    margin-bottom: 1rem !important; 
+                    text-align: center !important; 
+                }
+                #pdf-clone .logo-container img { 
+                    /* El titulo y el logo siempre mantienen el mismo tamaño */
+                    margin: 0 auto !important; 
+                }
             `;
             document.head.appendChild(style);
 
@@ -1050,9 +1132,9 @@
                     frame.id = 'pdf-clone';
                     frame.style.cssText = [
                         'position:fixed', 'left:-9999px', 'top:0',
-                        'width:420px',           // angosto para 11cm de corte
-                        'background:#FFFFFF', 'color:#1A1410',
-                        'padding:60px 80px 60px', // márgenes amplios
+                        'width:800px',           // ancho que simula el A4
+                        'background:#FFFFFF', 'color:#000000',
+                        'padding:40px 60px', // márgenes amplios
                         'font-family:"Cormorant Garamond",Georgia,serif',
                         'box-sizing:border-box',
                     ].join(';');
@@ -1061,9 +1143,9 @@
                     await new Promise(r => setTimeout(r, 150));
 
                     const canvas = await html2canvas(frame, {
-                        scale: 3, useCORS: true, allowTaint: true,
+                        scale: 2, useCORS: true, allowTaint: true,
                         backgroundColor: '#FFFFFF', logging: false,
-                        imageTimeout: 6000, windowWidth: 420,
+                        imageTimeout: 6000, windowWidth: 800,
                     });
                     document.body.removeChild(frame);
                     addCanvasPage(pdf, canvas, true);
