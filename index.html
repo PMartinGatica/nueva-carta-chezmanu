@@ -885,6 +885,7 @@
         /* Todo el texto se encuentra centrado.                  */
         const PDF_CUT_W_MM = 210;  // ancho final en mm
         const PDF_CUT_H_MM = 297;  // alto final en mm
+        const PDF_WINE_W_MM = 110; // ancho especial para carta de vinos
 
         /* ── Shared: captura un elemento DOM → canvas ── */
         async function captureFrame(html) {
@@ -913,24 +914,25 @@
         /* ── Agrega un canvas como página A4 al pdf ──
            fitToPage=true → escala para entrar en una sola hoja exacta
            fitToPage=false → slicing multipágina (para secciones largas) ── */
-        function addCanvasPage(pdf, canvas, isFirst, fitToPage = false) {
+        function addCanvasPage(pdf, canvas, isFirst, fitToPage = false, customWidth = null) {
             const pageW = pdf.internal.pageSize.getWidth();   // 210mm
             const pageH = pdf.internal.pageSize.getHeight();  // 297mm
+            const targetW = customWidth || PDF_CUT_W_MM;
 
-            // Área de corte centrada en A4 (11 × 28 cm)
-            const cutX = (pageW - PDF_CUT_W_MM) / 2;  // ~50mm cada lado
-            const cutY = (pageH - PDF_CUT_H_MM) / 2;  // ~8.5mm arriba/abajo
+            // Área de corte centrada en A4
+            const cutX = (pageW - targetW) / 2;
+            const cutY = (pageH - PDF_CUT_H_MM) / 2;
 
             if (fitToPage) {
                 if (!isFirst) pdf.addPage();
-                // Escalar el canvas para que entre en el área de 11×28cm
-                const scaleW = PDF_CUT_W_MM / canvas.width;
+                // Escalar el canvas para que entre en el área objetivo
+                const scaleW = targetW / canvas.width;
                 const scaleH = PDF_CUT_H_MM / canvas.height;
                 const scale  = Math.min(scaleW, scaleH);
                 const drawW  = canvas.width  * scale;
                 const drawH  = canvas.height * scale;
                 // Centrar dentro del área de corte
-                const offsetX = cutX + (PDF_CUT_W_MM - drawW) / 2;
+                const offsetX = cutX + (targetW - drawW) / 2;
                 const offsetY = cutY + (PDF_CUT_H_MM - drawH) / 2;
                 pdf.setFillColor(255, 255, 255);
                 pdf.rect(0, 0, pageW, pageH, 'F');
@@ -939,7 +941,7 @@
             }
 
             // Modo slicing (otras secciones) — centrado en área de corte
-            const drawW   = PDF_CUT_W_MM;
+            const drawW   = targetW;
             const scale   = drawW / canvas.width;
             const slicePx = Math.floor(PDF_CUT_H_MM / scale);
             let srcY = 0, page = 0;
@@ -1046,33 +1048,46 @@
                     margin: 1.2rem 0 0.8rem !important; 
                 }
                 #pdf-clone .category-name { 
-                    font-size: 1.6rem !important; 
+                    font-size: 2.2rem !important; 
                     font-weight: bold !important;
                     font-style: normal !important;
+                    color: #C00000 !important;
+                    text-transform: uppercase !important;
                 }
                 #pdf-clone .wine-item { 
                     display: flex !important; 
-                    flex-direction: column !important; 
-                    align-items: center !important; 
-                    text-align: center !important; 
+                    flex-direction: row !important; 
+                    align-items: baseline !important; 
+                    text-align: left !important; 
                     border-bottom: none !important; 
-                    padding: 0.6rem 0 !important; 
-                    gap: 0.2rem !important; 
+                    padding: 0.3rem 0 !important; 
+                    gap: 0.3rem !important; 
+                    width: 100% !important;
+                }
+                #pdf-clone .wine-item::after {
+                    content: "";
+                    flex: 1;
+                    border-bottom: 2px dotted #000;
+                    margin: 0 5px;
+                    order: 2;
                 }
                 #pdf-clone .wine-name { 
-                    font-size: 1.6rem !important; 
-                    font-weight: bold !important; 
+                    font-size: 2.2rem !important; 
+                    font-weight: normal !important; 
+                    order: 1;
+                    white-space: nowrap;
+                }
+                #pdf-clone .wine-item .item-price {
+                    order: 3;
+                    font-size: 2.2rem !important;
+                    font-weight: bold !important;
+                    margin: 0 !important;
                 }
                 #pdf-clone .wine-varietal { 
-                    text-align: center !important; 
-                    font-size: 1.1rem !important; 
-                    margin: 1.2rem 0 0.8rem !important; 
-                    border-bottom: none !important; 
-                    font-weight: bold !important; 
-                    letter-spacing: 0.1em !important; 
+                    display: none !important;
                 }
                 #pdf-clone .section-title { 
-                    font-size: 2.22rem !important; 
+                    font-size: 2.5rem !important; 
                     margin-bottom: 0.3rem !important; 
                     color: #C00000 !important;
                 }
@@ -1106,23 +1121,23 @@
                     const p1 = await captureFrame(hdr +
                         wineCatHeader('vinos-espum-arg') + wineBlock('vinos-espum-arg') +
                         wineCatHeader('vinos-espum-fr')  + wineBlock('vinos-espum-fr'));
-                    addCanvasPage(pdf, p1, true, true);
+                    addCanvasPage(pdf, p1, true, true, PDF_WINE_W_MM);
 
                     // Pág 2 — Blancos (incluye Rosado dentro de sus varietales)
                     const p2 = await captureFrame(hdr +
                         wineCatHeader('vinos-blancos') + wineBlock('vinos-blancos'));
-                    addCanvasPage(pdf, p2, false, true);
+                    addCanvasPage(pdf, p2, false, true, PDF_WINE_W_MM);
 
                     // Pág 3 — Tintos Ligeros + Tintos Cuerpo Medio
                     const p3 = await captureFrame(hdr +
                         wineCatHeader('vinos-ligeros') + wineBlock('vinos-ligeros') +
                         wineCatHeader('vinos-medio')   + wineBlock('vinos-medio'));
-                    addCanvasPage(pdf, p3, false, true);
+                    addCanvasPage(pdf, p3, false, true, PDF_WINE_W_MM);
 
                     // Pág 4 — Tintos Potentes
                     const p4 = await captureFrame(hdr +
                         wineCatHeader('vinos-potentes') + wineBlock('vinos-potentes'));
-                    addCanvasPage(pdf, p4, false, true);
+                    addCanvasPage(pdf, p4, false, true, PDF_WINE_W_MM);
 
                     pdf.save('Chez-Manu_Carte-des-Vins.pdf');
 
