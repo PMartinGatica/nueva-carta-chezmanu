@@ -588,6 +588,8 @@
                         d="M12 15V3m0 12-4-4m4 4 4-4M2 17l.621 2.485A2 2 0 0 0 4.561 21h14.878a2 2 0 0 0 1.94-1.515L22 17" />
                 </svg>
                 PDF
+
+            
             </button>
         </div>
     </nav>
@@ -667,8 +669,6 @@
                 <h2 class="section-title section-title-italic">Nos Desserts</h2>
                 <p class="section-subtitle">Postres · Desserts</p>
             </div>
-            <div class="category-header"><span class="category-name cat-single"
-                    style="color: var(--brown-terre)">Postres de saison</span></div>
             <div id="desserts-items"></div>
             
         </section>
@@ -965,9 +965,9 @@
         function winePageHeader() {
             const logoSrc = document.querySelector('#vinos .logo-img')?.src || '';
             return `
-                <div class="page-header" style="text-align:center;padding-bottom:1.2rem;border-bottom:none;margin-bottom:1.4rem;">
-                    <div class="logo-container"><img src="${logoSrc}" style="width:90px;height:auto;"></div>
-                    <h2 class="section-title" style="font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;line-height:1.15;margin-bottom:.2rem;">Carte des Vins</h2>
+                <div class="page-header">
+                    <div class="logo-container"><img src="${logoSrc}" style="width:130px;height:auto;"></div>
+                    <h2 class="section-title">Carte des Vins</h2>
                 </div>`;
         }
 
@@ -1014,39 +1014,39 @@
                     align-items: center !important; 
                     text-align: center !important; 
                     border-bottom: none !important; 
-                    padding: 1.5rem 0 !important; 
-                    gap: 0.5rem !important; 
+                    padding: 0.6rem 0 !important; 
+                    gap: 0.2rem !important; 
                 }
                 #pdf-clone .item-info { 
                     width: 100% !important; 
                     text-align: center !important; 
                 }
                 #pdf-clone .item-name { 
-                    font-size: 1.8rem !important; 
-                    margin-bottom: 0.2rem !important; 
+                    font-size: 1.3rem !important; 
+                    margin-bottom: 0.1rem !important; 
                     font-weight: bold !important; 
                 }
                 #pdf-clone .item-desc { 
-                    font-size: 1.2rem !important; 
+                    font-size: 0.9rem !important; 
                     font-weight: normal !important; 
-                    margin-bottom: 0.2rem !important; 
+                    margin-bottom: 0.1rem !important; 
                 }
                 #pdf-clone .item-translation { 
-                    font-size: 1.6rem !important; 
+                    font-size: 1.1rem !important; 
                     color: #000000 !important; 
                     font-style: italic !important; 
                 }
                 #pdf-clone .item-price { 
-                    font-size: 1.6rem !important; 
-                    margin-top: 0.2rem !important; 
+                    font-size: 1.2rem !important; 
+                    margin-top: 0.1rem !important; 
                     font-weight: bold !important; 
                 }
                 #pdf-clone .category-header { 
                     justify-content: center !important; 
-                    margin: 2.5rem 0 1.5rem !important; 
+                    margin: 1.2rem 0 0.8rem !important; 
                 }
                 #pdf-clone .category-name { 
-                    font-size: 2.2rem !important; 
+                    font-size: 1.6rem !important; 
                     font-weight: bold !important;
                     font-style: normal !important;
                 }
@@ -1056,24 +1056,24 @@
                     align-items: center !important; 
                     text-align: center !important; 
                     border-bottom: none !important; 
-                    padding: 1rem 0 !important; 
-                    gap: 0.3rem !important; 
+                    padding: 0.6rem 0 !important; 
+                    gap: 0.2rem !important; 
                 }
                 #pdf-clone .wine-name { 
-                    font-size: 1.6rem !important; 
+                    font-size: 1.3rem !important; 
                     font-weight: bold !important; 
                 }
                 #pdf-clone .wine-varietal { 
                     text-align: center !important; 
-                    font-size: 1.4rem !important; 
-                    margin: 2.5rem 0 1rem !important; 
+                    font-size: 1.1rem !important; 
+                    margin: 1.2rem 0 0.8rem !important; 
                     border-bottom: none !important; 
                     font-weight: bold !important; 
                     letter-spacing: 0.1em !important; 
                 }
                 #pdf-clone .section-title { 
-                    font-size: 2.8rem !important; 
-                    margin-bottom: 0.5rem !important; 
+                    font-size: 2.22rem !important; 
+                    margin-bottom: 0.3rem !important; 
                     color: #C00000 !important;
                 }
                 #pdf-clone .restaurant-name,
