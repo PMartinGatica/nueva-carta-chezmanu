@@ -894,7 +894,7 @@
                 'position:fixed', 'left:-9999px', 'top:0',
                 'width:800px',           // ancho que simula el A4
                 'background:#FFFFFF', 'color:#000000',
-                'padding:40px 60px', // padding generoso
+                'padding:10px 20px', // márgenes reducidos para ganar tamaño
                 'font-family:"Cormorant Garamond",Georgia,serif',
                 'box-sizing:border-box',
             ].join(';');
@@ -1022,22 +1022,22 @@
                     text-align: center !important; 
                 }
                 #pdf-clone .item-name { 
-                    font-size: 1.3rem !important; 
+                    font-size: 1.6rem !important; 
                     margin-bottom: 0.1rem !important; 
                     font-weight: bold !important; 
                 }
                 #pdf-clone .item-desc { 
-                    font-size: 0.9rem !important; 
+                    font-size: 1.1rem !important; 
                     font-weight: normal !important; 
                     margin-bottom: 0.1rem !important; 
                 }
                 #pdf-clone .item-translation { 
-                    font-size: 1.1rem !important; 
+                    font-size: 1.4rem !important; 
                     color: #000000 !important; 
                     font-style: italic !important; 
                 }
                 #pdf-clone .item-price { 
-                    font-size: 1.2rem !important; 
+                    font-size: 1.4rem !important; 
                     margin-top: 0.1rem !important; 
                     font-weight: bold !important; 
                 }
@@ -1060,7 +1060,7 @@
                     gap: 0.2rem !important; 
                 }
                 #pdf-clone .wine-name { 
-                    font-size: 1.3rem !important; 
+                    font-size: 1.6rem !important; 
                     font-weight: bold !important; 
                 }
                 #pdf-clone .wine-varietal { 
@@ -1127,28 +1127,49 @@
                     pdf.save('Chez-Manu_Carte-des-Vins.pdf');
 
                 } else {
-                    // ── RESTO DE SECCIONES: flujo original ────────────────
-                    const frame = document.createElement('div');
-                    frame.id = 'pdf-clone';
-                    frame.style.cssText = [
-                        'position:fixed', 'left:-9999px', 'top:0',
-                        'width:800px',           // ancho que simula el A4
-                        'background:#FFFFFF', 'color:#000000',
-                        'padding:40px 60px', // márgenes amplios
-                        'font-family:"Cormorant Garamond",Georgia,serif',
-                        'box-sizing:border-box',
-                    ].join(';');
-                    frame.innerHTML = activeSection.innerHTML;
-                    document.body.appendChild(frame);
-                    await new Promise(r => setTimeout(r, 150));
+                    // ── RESTO DE SECCIONES: cabecera fija + ítems adaptables ──
+                    // La cabecera (logo + título) NUNCA se achica.
+                    // Solo los ítems del menú se escalan para entrar en una hoja.
 
-                    const canvas = await html2canvas(frame, {
-                        scale: 2, useCORS: true, allowTaint: true,
-                        backgroundColor: '#FFFFFF', logging: false,
-                        imageTimeout: 6000, windowWidth: 800,
-                    });
-                    document.body.removeChild(frame);
-                    addCanvasPage(pdf, canvas, true);
+                    // 1. Capturar cabecera a tamaño fijo
+                    const headerEl = activeSection.querySelector('.page-header');
+                    const headerHTML = headerEl ? headerEl.outerHTML : '';
+                    const headerCanvas = await captureFrame(headerHTML);
+
+                    // 2. Capturar ítems (todo menos la cabecera)
+                    const itemsHTML = Array.from(activeSection.children)
+                        .filter(el => !el.classList.contains('page-header'))
+                        .map(el => el.outerHTML).join('');
+                    const itemsCanvas = await captureFrame(itemsHTML);
+
+                    // 3. Componer en una sola página A4
+                    const pageW = pdf.internal.pageSize.getWidth();
+                    const pageH = pdf.internal.pageSize.getHeight();
+                    const cutX = (pageW - PDF_CUT_W_MM) / 2;
+                    const cutY = (pageH - PDF_CUT_H_MM) / 2;
+
+                    pdf.setFillColor(255, 255, 255);
+                    pdf.rect(0, 0, pageW, pageH, 'F');
+
+                    // Cabecera: siempre a escala natural (ajustada al ancho A4)
+                    const hdrScale = PDF_CUT_W_MM / headerCanvas.width;
+                    const hdrDrawW = PDF_CUT_W_MM;
+                    const hdrDrawH = headerCanvas.height * hdrScale;
+                    pdf.addImage(headerCanvas.toDataURL('image/png'), 'PNG',
+                        cutX, cutY, hdrDrawW, hdrDrawH);
+
+                    // Ítems: escalar solo lo mínimo para entrar en el espacio restante
+                    const remainH = PDF_CUT_H_MM - hdrDrawH;
+                    const itemScaleW = PDF_CUT_W_MM / itemsCanvas.width;
+                    const itemScaleH = remainH / itemsCanvas.height;
+                    const itemScale = Math.min(itemScaleW, itemScaleH);
+                    const itemDrawW = itemsCanvas.width * itemScale;
+                    const itemDrawH = itemsCanvas.height * itemScale;
+                    // Centrar ítems horizontalmente debajo de la cabecera
+                    const itemX = cutX + (PDF_CUT_W_MM - itemDrawW) / 2;
+                    const itemY = cutY + hdrDrawH;
+                    pdf.addImage(itemsCanvas.toDataURL('image/png'), 'PNG',
+                        itemX, itemY, itemDrawW, itemDrawH);
 
                     const title = activeSection.dataset.title || 'menu';
                     pdf.save(`Chez-Manu_${title.replace(/\s+/g, '-')}.pdf`);
