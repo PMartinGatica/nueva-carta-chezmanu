@@ -970,7 +970,7 @@
             const logoSrc = document.querySelector('#vinos .logo-img')?.src || '';
             return `
                 <div class="page-header">
-                    <div class="logo-container"><img src="${logoSrc}" style="width:130px;height:auto;"></div>
+                    <div class="logo-container"><img src="${logoSrc}" style="width:320px;height:auto;margin-bottom:10px;"></div>
                     <h2 class="section-title">Carte des Vins</h2>
                 </div>`;
         }
@@ -1005,7 +1005,9 @@
             style.textContent = `
                 #pdf-clone, #pdf-clone * { 
                     background: #FFFFFF !important; 
+                    background-color: #FFFFFF !important;
                     box-shadow: none !important; 
+                    text-shadow: none !important;
                     color: #000000 !important; 
                 }
                 #pdf-clone .category-header::before,
@@ -1026,28 +1028,28 @@
                     text-align: center !important; 
                 }
                 #pdf-clone .item-name { 
-                    font-size: 1.6rem !important; 
+                    font-size: 2.0rem !important; 
                     margin-bottom: 0.1rem !important; 
                     font-weight: bold !important; 
                 }
                 #pdf-clone .item-desc { 
-                    font-size: 1.1rem !important; 
+                    font-size: 1.3rem !important; 
                     font-weight: normal !important; 
                     margin-bottom: 0.1rem !important; 
                 }
                 #pdf-clone .item-translation { 
-                    font-size: 1.4rem !important; 
+                    font-size: 1.6rem !important; 
                     color: #000000 !important; 
                     font-style: italic !important; 
                 }
                 #pdf-clone .item-price { 
-                    font-size: 1.4rem !important; 
+                    font-size: 1.8rem !important; 
                     margin-top: 0.1rem !important; 
                     font-weight: bold !important; 
                 }
                 #pdf-clone .category-header { 
                     justify-content: center !important; 
-                    margin: 1.2rem 0 0.8rem !important; 
+                    margin: 0.2rem 0 0.5rem !important; 
                 }
                 #pdf-clone .category-name { 
                     font-size: 2.2rem !important; 
@@ -1099,12 +1101,15 @@
                 }
                 #pdf-clone .page-header { 
                     border-bottom: none !important; 
-                    margin-bottom: 1rem !important; 
+                    margin-bottom: 0 !important; 
+                    padding-bottom: 0.1rem !important;
                     text-align: center !important; 
                 }
                 #pdf-clone .logo-container img { 
-                    /* El titulo y el logo siempre mantienen el mismo tamaño */
+                    width: 320px !important;
+                    height: auto !important;
                     margin: 0 auto !important; 
+                    display: block !important;
                 }
             `;
             document.head.appendChild(style);
