@@ -582,6 +582,7 @@
             <button class="nav-tab" onclick="showSection('principales', this)">Principales</button>
             <button class="nav-tab" onclick="showSection('desserts', this)">Desserts</button>
             <button class="nav-tab" onclick="showSection('vinos', this)">Vins</button>
+            <button class="nav-tab" onclick="showSection('boissons', this)">Boissons</button>
         </div>
         </div>
         <div class="nav-actions">
@@ -624,6 +625,9 @@
                     <button class="cover-btn"
                         onclick="showSection('vinos', document.querySelector('.nav-tab:nth-child(5)'))">Carte
                         des Vins</button>
+                    <button class="cover-btn"
+                        onclick="showSection('boissons', document.querySelector('.nav-tab:nth-child(6)'))">Nos
+                        Boissons</button>
                 </div>
             </div>
         </section>
@@ -723,6 +727,24 @@
             </div>
             <div id="vinos-potentes"></div>
 
+        </section>
+
+        <!-- BOISSONS (Bebidas sin alcohol) -->
+        <section id="boissons" class="menu-section" data-title="Nos Boissons">
+            <div class="page-header">
+                <div class="logo-container">
+                    <img src="logo-chez-manu.png" alt="Chez Manu" class="logo-img">
+                </div>
+                <div class="restaurant-name">Chez Manu</div>
+                <h2 class="section-title section-title-italic">Nos Boissons</h2>
+                <p class="section-subtitle">Bebidas sin alcohol · Non-Alcoholic Beverages</p>
+            </div>
+            <div class="category-header"><span class="category-name">Eaux Minérales</span></div>
+            <div id="boissons-aguas"></div>
+            <div class="category-header" style="margin-top:1.5rem"><span class="category-name">Boissons Chaudes</span></div>
+            <div id="boissons-calientes"></div>
+            <div class="category-header" style="margin-top:1.5rem"><span class="category-name">Boissons Fraîches</span></div>
+            <div id="boissons-frias"></div>
         </section>
 
     </main>
@@ -842,6 +864,27 @@
             });
         }
 
+        /* ── Bebidas sin alcohol (datos locales) ── */
+        function renderBoissons() {
+            const aguas = [
+                { nombre: 'Agua mineral', traduccion: 'Mineral water', precio: 5000 },
+                { nombre: 'Agua saborizada', traduccion: 'Flavored water', precio: 6000 },
+            ];
+            const calientes = [
+                { nombre: 'Café espresso', traduccion: 'Espresso coffee', precio: 4500 },
+                { nombre: 'Café doble', traduccion: 'Double espresso', precio: 5500 },
+                { nombre: 'Café con leche', traduccion: 'Coffee with milk', precio: 5500 },
+                { nombre: 'Chocolat chaud', traduccion: 'Hot chocolate', precio: 6500 },
+            ];
+            const frias = [
+                { nombre: 'Jugo de naranja exprimido', traduccion: 'Fresh squeezed orange juice', precio: 7000 },
+                { nombre: 'Gaseosa línea Coca-Cola', traduccion: 'Coca-Cola soft drinks', precio: 5500 },
+            ];
+            renderItems('boissons-aguas', aguas);
+            renderItems('boissons-calientes', calientes);
+            renderItems('boissons-frias', frias);
+        }
+
         /* ── Carga el menú completo desde la API ── */
         async function loadMenu() {
             try {
@@ -862,6 +905,9 @@
                 // Renderizar vinos
                 renderVinosFromAPI(data.vinos);
 
+                // Renderizar bebidas sin alcohol (datos locales)
+                renderBoissons();
+
                 showToast('✓ Carta cargada');
             } catch (err) {
                 console.error('Error cargando menú:', err);
@@ -877,7 +923,7 @@
             document.getElementById(id)?.classList.add('active');
             if (clickedTab) clickedTab.classList.add('active');
             else {
-                const tabs = ['cover', 'entrees', 'principales', 'desserts', 'vinos'];
+                const tabs = ['cover', 'entrees', 'principales', 'desserts', 'vinos', 'boissons'];
                 const idx = tabs.indexOf(id);
                 document.querySelectorAll('.nav-tab')[idx]?.classList.add('active');
             }
@@ -1211,80 +1257,99 @@
                     pdf.save('Chez-Manu_Carte-des-Vins.pdf');
 
                 } else {
-                    // ── RESTO DE SECCIONES: título + ítems + logo en pie de página ──
+                    // ── Función para componer una página de comida ──
+                    async function composeFoodPage(pdf, titleHTML, itemsHTML, isFirst) {
+                        if (!isFirst) pdf.addPage();
 
-                    // 1. Capturar cabecera SIN logo (solo título)
-                    const headerEl = activeSection.querySelector('.page-header');
-                    const headerClone = headerEl ? headerEl.cloneNode(true) : null;
-                    if (headerClone) {
-                        const logoContainer = headerClone.querySelector('.logo-container');
-                        if (logoContainer) logoContainer.remove();
+                        const titleCanvas = await captureFrame(titleHTML);
+                        const pageW = pdf.internal.pageSize.getWidth();
+                        const pageH = pdf.internal.pageSize.getHeight();
+                        const cutX = (pageW - PDF_CUT_W_MM) / 2;
+                        const cutY = (pageH - PDF_CUT_H_MM) / 2;
+
+                        const logoSpace = 23;
+                        const hdrScale = PDF_CUT_W_MM / titleCanvas.width;
+                        const hdrDrawW = PDF_CUT_W_MM;
+                        const hdrDrawH = titleCanvas.height * hdrScale;
+                        const usableH = PDF_CUT_H_MM - hdrDrawH - logoSpace;
+
+                        const gaps = [1.0, 0.8, 0.6, 0.4, 0.2, 0.1];
+                        let itemsCanvas, itemScale, itemDrawW, itemDrawH;
+
+                        for (const gap of gaps) {
+                            const gapStyle = `<style>
+                                #pdf-clone .menu-item { padding: ${gap * 2.2}rem 0 !important; gap: ${gap}rem !important; }
+                                #pdf-clone .item-info { gap: ${gap}rem !important; }
+                            </style>`;
+                            itemsCanvas = await captureFrame(gapStyle + itemsHTML);
+                            const scaleW = PDF_CUT_W_MM / itemsCanvas.width;
+                            const scaleH = usableH / itemsCanvas.height;
+                            itemScale = Math.min(scaleW, scaleH);
+                            itemDrawW = itemsCanvas.width * itemScale;
+                            itemDrawH = itemsCanvas.height * itemScale;
+                            if (itemScale >= scaleW * 0.9) break;
+                        }
+
+                        pdf.setFillColor(255, 255, 255);
+                        pdf.rect(0, 0, pageW, pageH, 'F');
+
+                        const totalH = hdrDrawH + itemDrawH;
+                        const contentAreaH = PDF_CUT_H_MM - logoSpace;
+                        const startY = cutY + (contentAreaH - totalH) / 3;
+
+                        pdf.addImage(titleCanvas.toDataURL('image/png'), 'PNG',
+                            cutX, startY, hdrDrawW, hdrDrawH);
+
+                        const itemX = cutX + (PDF_CUT_W_MM - itemDrawW) / 2;
+                        const itemY = startY + hdrDrawH;
+                        pdf.addImage(itemsCanvas.toDataURL('image/png'), 'PNG',
+                            itemX, itemY, itemDrawW, itemDrawH);
+
+                        const logoFixedY = pageH - 5 - 15;
+                        addFooterLogo(pdf, invertedLogo, PDF_CUT_W_MM, logoFixedY);
                     }
-                    const headerHTML = headerClone ? headerClone.outerHTML : '';
-                    const headerCanvas = await captureFrame(headerHTML);
 
-                    // 2. Medir espacio disponible
-                    const pageW = pdf.internal.pageSize.getWidth();
-                    const pageH = pdf.internal.pageSize.getHeight();
-                    const cutX = (pageW - PDF_CUT_W_MM) / 2;
-                    const cutY = (pageH - PDF_CUT_H_MM) / 2;
+                    if (activeSection.id === 'principales') {
+                        // ── PRINCIPALES: 2 páginas — La Mer + La Terre ──
+                        const headerEl = activeSection.querySelector('.page-header');
+                        const headerClone = headerEl ? headerEl.cloneNode(true) : null;
+                        if (headerClone) {
+                            const logoContainer = headerClone.querySelector('.logo-container');
+                            if (logoContainer) logoContainer.remove();
+                        }
+                        const baseHeaderHTML = headerClone ? headerClone.outerHTML : '';
 
-                    // Logo siempre fijo: reservar espacio (logo 15mm + gap 8mm)
-                    const logoSpace = 23; // mm para logo + gap
-                    const hdrScale = PDF_CUT_W_MM / headerCanvas.width;
-                    const hdrDrawW = PDF_CUT_W_MM;
-                    const hdrDrawH = headerCanvas.height * hdrScale;
-                    const usableH = PDF_CUT_H_MM - hdrDrawH - logoSpace;
+                        // Pág 1 — La Mer
+                        const merCatHTML = activeSection.querySelector('.cat-mer')?.closest('.category-header')?.outerHTML || '';
+                        const merItemsHTML = document.getElementById('mer-items')?.innerHTML || '';
+                        await composeFoodPage(pdf, baseHeaderHTML, merCatHTML + merItemsHTML, true);
 
-                    // 3. Capturar ítems con gap adaptable
-                    // Probar con gap decreciente hasta que entre en el espacio
-                    const itemsEls = Array.from(activeSection.children)
-                        .filter(el => !el.classList.contains('page-header'));
-                    const itemsHTML = itemsEls.map(el => el.outerHTML).join('');
+                        // Pág 2 — La Terre
+                        const terreCatHTML = activeSection.querySelector('.cat-terre')?.closest('.category-header')?.outerHTML || '';
+                        const terreItemsHTML = document.getElementById('terre-items')?.innerHTML || '';
+                        await composeFoodPage(pdf, baseHeaderHTML, terreCatHTML + terreItemsHTML, false);
 
-                    const gaps = [1.0, 0.8, 0.6, 0.4, 0.2, 0.1]; // rem, de mayor a menor
-                    let itemsCanvas, itemScale, itemDrawW, itemDrawH, usedGap;
+                        pdf.save('Chez-Manu_Nos-Assiettes-Principales.pdf');
 
-                    for (const gap of gaps) {
-                        // Inyectar override de gap en el HTML
-                        const gapStyle = `<style>
-                            #pdf-clone .menu-item { padding: ${gap * 2.2}rem 0 !important; gap: ${gap}rem !important; }
-                            #pdf-clone .item-info { gap: ${gap}rem !important; }
-                        </style>`;
-                        itemsCanvas = await captureFrame(gapStyle + itemsHTML);
-                        const scaleW = PDF_CUT_W_MM / itemsCanvas.width;
-                        const scaleH = usableH / itemsCanvas.height;
-                        itemScale = Math.min(scaleW, scaleH);
-                        itemDrawW = itemsCanvas.width * itemScale;
-                        itemDrawH = itemsCanvas.height * itemScale;
-                        usedGap = gap;
-                        // Si entra sin escalar demasiado (al menos 90% del tamaño natural)
-                        if (itemScale >= scaleW * 0.9) break;
+                    } else {
+                        // ── RESTO: una sola página ──
+                        const headerEl = activeSection.querySelector('.page-header');
+                        const headerClone = headerEl ? headerEl.cloneNode(true) : null;
+                        if (headerClone) {
+                            const logoContainer = headerClone.querySelector('.logo-container');
+                            if (logoContainer) logoContainer.remove();
+                        }
+                        const headerHTML = headerClone ? headerClone.outerHTML : '';
+
+                        const itemsEls = Array.from(activeSection.children)
+                            .filter(el => !el.classList.contains('page-header'));
+                        const itemsHTML = itemsEls.map(el => el.outerHTML).join('');
+
+                        await composeFoodPage(pdf, headerHTML, itemsHTML, true);
+
+                        const title = activeSection.dataset.title || 'menu';
+                        pdf.save(`Chez-Manu_${title.replace(/\s+/g, '-')}.pdf`);
                     }
-
-                    // 4. Componer en página
-                    pdf.setFillColor(255, 255, 255);
-                    pdf.rect(0, 0, pageW, pageH, 'F');
-
-                    // Centrar contenido verticalmente en el espacio usable (sin contar logo)
-                    const totalH = hdrDrawH + itemDrawH;
-                    const contentAreaH = PDF_CUT_H_MM - logoSpace;
-                    const startY = cutY + (contentAreaH - totalH) / 3;
-
-                    pdf.addImage(headerCanvas.toDataURL('image/png'), 'PNG',
-                        cutX, startY, hdrDrawW, hdrDrawH);
-
-                    const itemX = cutX + (PDF_CUT_W_MM - itemDrawW) / 2;
-                    const itemY = startY + hdrDrawH;
-                    pdf.addImage(itemsCanvas.toDataURL('image/png'), 'PNG',
-                        itemX, itemY, itemDrawW, itemDrawH);
-
-                    // Logo siempre fijo al pie
-                    const logoFixedY = pageH - 5 - 15; // 5mm del borde, 15mm de alto del logo
-                    addFooterLogo(pdf, invertedLogo, PDF_CUT_W_MM, logoFixedY);
-
-                    const title = activeSection.dataset.title || 'menu';
-                    pdf.save(`Chez-Manu_${title.replace(/\s+/g, '-')}.pdf`);
                 }
 
                 showToast('✓ PDF descargado');
