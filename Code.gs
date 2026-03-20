@@ -10,6 +10,7 @@ const SHEETS = {
   mer:        'Principales_Mar',
   terre:      'Principales_Tierra',
   desserts:   'Postres',
+  boissons:   'Bebidas',
   vinos:      'Vinos',
   historial:  'Historial_Precios',
 };
@@ -52,6 +53,9 @@ function doGet(e) {
         break;
       case 'desserts':
         result = getItems(SHEETS.desserts);
+        break;
+      case 'boissons':
+        result = getItems(SHEETS.boissons);
         break;
       case 'vinos':
         result = getVinos();
@@ -111,6 +115,7 @@ function getFullMenu() {
     mer:      getItems(SHEETS.mer),
     terre:    getItems(SHEETS.terre),
     desserts: getItems(SHEETS.desserts),
+    boissons: getItems(SHEETS.boissons),
     vinos:    getVinos(),
   };
 }
@@ -354,6 +359,11 @@ function setupSheets() {
       color: '#C00000',
     },
     {
+      name: SHEETS.boissons,
+      headers: ['ID', 'Nombre', 'Descripcion', 'Traduccion', 'Precio', 'Activo', 'Orden'],
+      color: '#2E86C1',
+    },
+    {
       name: SHEETS.vinos,
       headers: ['ID', 'Categoria', 'Varietal', 'Nombre', 'Precio', 'Activo', 'Orden'],
       color: '#6B1A45',
@@ -408,7 +418,7 @@ function setupSheets() {
   histSheet.getRange('A2:A1000').setNumberFormat('dd/mm/yyyy HH:mm');
 
   // Formato de moneda en columnas Precio de todas las hojas de menú
-  [SHEETS.entrees, SHEETS.mer, SHEETS.terre, SHEETS.desserts].forEach(name => {
+  [SHEETS.entrees, SHEETS.mer, SHEETS.terre, SHEETS.desserts, SHEETS.boissons].forEach(name => {
     const s = ss.getSheetByName(name);
     s.getRange('E2:E1000').setNumberFormat('$#,##0');
   });
@@ -468,6 +478,19 @@ function seedData() {
     [genId(), 'Copa de Helado artesanal',                                       '',                                  '',                                                                         9000, 'SI', 6],
   ];
   appendRows(ss, SHEETS.desserts, dessertData);
+
+  // ── BEBIDAS SIN ALCOHOL ──────────────────────────────────
+  const boissonsData = [
+    [genId(), 'Agua mineral',              '', 'Mineral water',              5000, 'SI', 1],
+    [genId(), 'Agua saborizada',           '', 'Flavored water',             6000, 'SI', 2],
+    [genId(), 'Café espresso',             '', 'Espresso coffee',            4500, 'SI', 3],
+    [genId(), 'Café doble',                '', 'Double espresso',            5500, 'SI', 4],
+    [genId(), 'Café con leche',            '', 'Coffee with milk',           5500, 'SI', 5],
+    [genId(), 'Chocolat chaud',            '', 'Hot chocolate',              6500, 'SI', 6],
+    [genId(), 'Jugo de naranja exprimido', '', 'Fresh squeezed orange juice', 7000, 'SI', 7],
+    [genId(), 'Gaseosa línea Coca-Cola',   '', 'Coca-Cola soft drinks',      5500, 'SI', 8],
+  ];
+  appendRows(ss, SHEETS.boissons, boissonsData);
 
   // ── VINOS ─────────────────────────────────────────────────
   // Columnas: ID | Categoria | Varietal | Nombre | Precio | Activo | Orden
